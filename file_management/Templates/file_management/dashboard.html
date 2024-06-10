@@ -1,0 +1,115 @@
+{% extends 'file_management/app.html' %}
+{% load static %}
+
+
+{% block title %}
+Coop Repo
+{% endblock %}
+
+{% block additional_css %}
+<style>
+    /* Add additional CSS specific to the dashboard page */
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-light navbar-expand bg-white shadow mb-4 topbar static-top">
+    <div class="container-fluid">
+        <button class="btn btn-link d-md-none rounded-circle me-3" id="sidebarToggleTop" type="button"><i class="fas fa-bars"></i></button>
+        <form class="d-none d-sm-inline-block me-auto ms-md-3 my-2 my-md-0 mw-100 navbar-search">
+            <div class="input-group">
+                <input class="bg-light form-control border-0 small" type="text" placeholder="Search for ...">
+                <button class="btn btn-primary py-0" type="button" style="background: #00aeef;"><i class="fas fa-search"></i></button>
+            </div>
+        </form>
+        <ul class="navbar-nav flex-nowrap ms-auto">
+            <div class="d-none d-sm-block topbar-divider"></div>
+            <li class="nav-item dropdown no-arrow">
+                <div class="nav-item dropdown no-arrow">
+                    <a class="dropdown-toggle nav-link" aria-expanded="false" data-bs-toggle="dropdown" href="#">
+                        <span class="d-none d-lg-inline me-2 text-gray-600 small">Bilisuma Tadesse</span>
+                        <img class="border rounded-circle img-profile" src="{% static 'img/avatars/bili.jpg' %}">
+                    </a>
+                    <div class="dropdown-menu shadow dropdown-menu-end animated--grow-in">
+                        <a class="dropdown-item" href="#"><i class="fas fa-user fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Profile</a>
+                        <a class="dropdown-item" href="#"><i class="fas fa-cogs fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Settings</a>
+                        <a class="dropdown-item" href="#"><i class="fas fa-list fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Activity log</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt fa-sm fa-fw me-2 text-gray-400"></i>&nbsp;Logout</a>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</nav>
+<div class="container-fluid">
+    <div class="d-sm-flex justify-content-between align-items-center mb-4"></div>
+    <div class="row">
+        <div class="col-xl-2" style="--bs-body-bg: #ffffff;border-right-style: solid;border-right-color: rgb(211,212,216);border-radius: 2px;">
+            <div class="row">
+                <div class="col">
+                    <h1 class="h5"><i class="fas fa-compact-disc" style="font-size: 22px;"></i><strong><span style="color: var(--bs-body-color);">&nbsp;Dir</span></strong><span style="color: var(--bs-body-color);">\.</span></h1>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col">
+                    <ul>
+                        <li><i class="far fa-folder-open"></i>&nbsp;Visa</li>
+                        <li><i class="far fa-folder-open"></i>&nbsp;MasterCard</li>
+                        <li><i class="far fa-folder-open"></i>&nbsp;CRM</li>
+                        <li><i class="far fa-folder-open"></i>&nbsp;NCR</li>
+                        <li><i class="far fa-folder-open"></i>&nbsp;POS</li>
+                        <li><i class="far fa-folder-open"></i>&nbsp;IST</li>
+                        <li><i class="far fa-folder-open"></i>&nbsp;Cortex</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col" style="box-shadow: 0px 0px;">
+            <div class="row">
+                <div class="col">
+                    <a class="btn btn-primary btn-sm d-none d-sm-inline-block" role="button" href="#"><i class="fas fa-upload fa-sm text-white-50"></i>&nbsp;Upload</a>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>File Name</th>
+                                    <th>Type&nbsp;</th>
+                                    <th>Date</th>
+                                    <th>Size&nbsp;</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><i class="far fa-file-alt"></i>&nbsp;ATM-Test Case.csv<span></span></td>
+                                    <td>csv</td>
+                                    <td>June 10,2024</td>
+                                    <td>4kb</td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm mx-2" type="button">Detail&nbsp;</button>
+                                        <button class="btn btn-primary btn-sm mx-2" type="button">View</button>
+                                        <button class="btn btn-primary btn-sm mx-2" type="button">Download</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><i class="far fa-file-alt"></i>&nbsp;ATM-Test Case.csv<span></span></td>
+                                    <td>csv</td>
+                                    <td>June 10,2024</td>
+                                    <td>4kb</td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm mx-2" type="button">Detail&nbsp;</button>
+                                        <button class="btn btn-primary btn-sm mx-2" type="button">View</button>
+                                        <button class="btn btn-primary btn-sm mx-2" type="button">Download</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
