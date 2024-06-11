@@ -8,10 +8,13 @@ from .forms import FolderCreationForm, FileUploadForm
 from django.http import HttpResponse
 import os
 import shutil
-
+import mimetypes
 import tempfile
 import zipfile
+import webbrowser
 from django.http import HttpResponse
+
+
 
 def login_view(request):
     if request.method == 'POST':
@@ -43,42 +46,6 @@ def generate_breadcrumbs(path):
 
 @login_required
 
-# def dashboard(request):
-#     media_path = request.GET.get('path', '')
-#     full_path = os.path.join(settings.MEDIA_ROOT, media_path.lstrip('/'))
-#     if not os.path.exists(full_path):
-#         os.makedirs(full_path)
-
-#     if request.method == 'POST':
-#         if 'create_folder' in request.POST:
-#             folder_form = FolderCreationForm(request.POST)
-#             if folder_form.is_valid():
-#                 folder_name = folder_form.cleaned_data['folder_name']
-#                 os.makedirs(os.path.join(full_path, folder_name))
-#         elif 'upload_file' in request.POST:
-#             file_form = FileUploadForm(request.POST, request.FILES)
-#             if file_form.is_valid():
-#                 file = request.FILES['file']
-#                 with open(os.path.join(full_path, file.name), 'wb+') as destination:
-#                     for chunk in file.chunks():
-#                         destination.write(chunk)
-
-#     items = []
-#     for item in os.listdir(full_path):
-#         item_path = os.path.join(full_path, item)
-#         items.append({
-#             'name': item,
-#             'type': 'Folder' if os.path.isdir(item_path) else 'File',
-#             'modified': os.path.getmtime(item_path),
-#             'size': os.path.getsize(item_path) if os.path.isfile(item_path) else '-'
-#         })
-
-#     return render(request, 'file_management/dashboard.html', {
-#         'items': items,
-#         'media_path': media_path,
-#         'folder_form': FolderCreationForm(),
-#         'file_form': FileUploadForm()
-#     })
 
 def dashboard(request):
     path = request.GET.get('path', '')
@@ -223,14 +190,43 @@ def delete_file(request):
             os.remove(full_file_path)
         # Redirect back to the dashboard or any other appropriate page
         return redirect('dashboard')
-
 def view_file(request):
-    pass
+    if request.method == 'GET':
+        # Extract file name from the request GET parameters
+        file_name = request.GET.get('name')
+        # Extract folder path from the request GET parameters
+        folder_path = request.GET.get('path')
+        # Construct the full file path using the folder path and file name
+        full_file_path = os.path.join(settings.MEDIA_ROOT, folder_path.lstrip('/'), file_name)
+        # Check if the file exists
+        if os.path.exists(full_file_path):
+            # Get the MIME type of the file
+            mime_type, _ = mimetypes.guess_type(full_file_path)
+            # Open the file with the default program
+            if mime_type:
+                webbrowser.open(full_file_path)
+            else:
+                # Serve the file for download
+                with open(full_file_path, 'rb') as f:
+                    response = HttpResponse(f.read(), content_type='application/force-download')
+                    response['Content-Disposition'] = f'attachment; filename="{file_name}"'
+                return response
+        else:
+            # File not found, return a 404 response
+            return HttpResponse(status=404)
 
-# Download File
+    # Placeholder response if the request method is not GET
+    return HttpResponse('File View Initiated')
 def download_file(request):
-   pass
-
-# Open File
-def open_file(request):
-    pass
+    if request.method == 'GET':
+        # Extract file name from the request GET parameters
+        file_name = request.GET.get('name')
+        # Extract folder path from the request GET parameters
+        folder_path = request.GET.get('path')
+        # Construct the full file path using the folder path and file name
+        full_file_path = os.path.join(settings.MEDIA_ROOT, folder_path.lstrip('/'), file_name)
+        # Return the file as a downloadable attachment
+        with open(full_file_path, 'rb') as file:
+            response = HttpResponse(file.read(), content_type='application/force-download')
+            response['Content-Disposition'] = 'attachment; filename=%s' % file_name
+            return response
