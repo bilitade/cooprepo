@@ -41,66 +41,6 @@ Coop Repo
         </ul>
     </div>
 </nav>
-{% comment %} <div class="container-fluid">
-    <div class="d-sm-flex justify-content-between align-items-center mb-4"></div>
-    <div class="row">
-        <div class="col-xl-2" style="--bs-body-bg: #ffffff;border-right-style: solid;border-right-color: rgb(211,212,216);border-radius: 2px;">
-            <div class="row">
-                <div class="col">
-                    <h1 class="h5"><i class="fas fa-compact-disc" style="font-size: 22px;"></i><strong><span style="color: var(--bs-body-color);">&nbsp;Dir</span></strong><span style="color: var(--bs-body-color);">\.</span></h1>
-                </div>
-            </div>
-            <hr>
-            <div class="row">
-                <div class="col">
-                    <ul>
-                        <li><i class="far fa-folder-open"></i>&nbsp;Visa</li>
-                        <li><i class="far fa-folder-open"></i>&nbsp;MasterCard</li>
-                        <li><i class="far fa-folder-open"></i>&nbsp;CRM</li>
-                        <li><i class="far fa-folder-open"></i>&nbsp;NCR</li>
-                        <li><i class="far fa-folder-open"></i>&nbsp;POS</li>
-                        <li><i class="far fa-folder-open"></i>&nbsp;IST</li>
-                        <li><i class="far fa-folder-open"></i>&nbsp;Cortex</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <div class="col" style="box-shadow: 0px 0px;">
-            <div class="row">
-                <div class="col">
-                    <a class="btn btn-primary btn-sm d-none d-sm-inline-block" role="button" href="#"><i class="fas fa-upload fa-sm text-white-50"></i>&nbsp;Upload</a>
-                    <div class="table-responsive">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>File Name</th>
-                                    <th>Type</th>
-                                    <th>Upload Date</th>
-                                    <th>Size</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for file in files %}
-                                <tr>
-                                    <td><i class="far fa-file-alt"></i>&nbsp;<a href="{{ file.file.url }}">{{ file.file.name }}</a></td>
-                                    <td>{{ file.file.name|slice:"-3:" }}</td>
-                                    <td>{{ file.uploaded_at|date:"F j, Y" }}</td>
-                                    <td>{{ file.file.size|filesizeformat }}</td>
-                                    <td>
-                                        <a class="btn btn-primary btn-sm mx-2" href="{{ file.file.url }}" target="_blank">View</a>
-                                        <a class="btn btn-primary btn-sm mx-2" href="{{ file.file.url }}" download>Download</a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div> {% endcomment %}
 
 <div class="container-fluid">
     <div class="d-sm-flex justify-content-between align-items-center mb-4"></div>
@@ -111,14 +51,22 @@ Coop Repo
                     <div class="row">
                         <div class="col">
                             <ol class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="#"><span><i class="fas fa-compact-disc"></i> Media</span></a></li>
-                                <li class="breadcrumb-item"><a href="#"><span>Uploads</span></a></li>
-                                <li class="breadcrumb-item"><a href="#"><span></span></a></li>
+                                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                                {% for name, breadcrumb_path in breadcrumbs %}
+                                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}?path={{ breadcrumb_path }}">{{ name }}</a></li>
+                                {% endfor %}
                             </ol>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col" style="border-radius: 2px;border-top-left-radius: 1px;border-top-right-radius: 1px;border-bottom-right-radius: 1px;border-bottom-left-radius: 1px;border-style: solid;border-color: rgb(228,229,233);"><button class="btn btn-light btn-sm px-3 mx-2" id="create_directory"><i class="fas fa-folder-plus" style="color: #00aeef;font-size: 20px;"></i></button><button class="btn btn-light btn-sm px-3" id="upload_file" type="button" style="font-size: 20px;"><i class="fas fa-file-upload" style="color: #00aeef;"></i></button></div>
+                        <div class="col" style="border-radius: 2px;border-top-left-radius: 1px;border-top-right-radius: 1px;border-bottom-right-radius: 1px;border-bottom-left-radius: 1px;border-style: solid;border-color: rgb(228,229,233);">
+                            <button class="btn btn-light btn-sm px-3 mx-2" data-bs-toggle="modal" data-bs-target="#createFolderModal">
+                                <i class="fas fa-folder-plus" style="color: #00aeef;font-size: 20px;"></i>
+                            </button>
+                            <button class="btn btn-light btn-sm px-3" data-bs-toggle="modal" data-bs-target="#uploadFileModal" style="font-size: 20px;">
+                                <i class="fas fa-file-upload" style="color: #00aeef;"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -136,20 +84,27 @@ Coop Repo
                                 </tr>
                             </thead>
                             <tbody>
+                                {% for item in items %}
                                 <tr>
-                                    <td><i class="far fa-folder" style="color: #00aeef;font-size: 19px;"></i>&nbsp;VISA&nbsp;<span></span></td>
-                                    <td>Folder</td>
-                                    <td>June 10,2024</td>
-                                    <td>-</td>
-                                    <td><button class="btn btn-light" type="button"><i class="fas fa-ellipsis-v" style="color: #00aeef;"></i></button></td>
+                                    <td>
+                                        {% if item.type == 'Folder' %}
+                                            <i class="far fa-folder" style="color: #00aeef;font-size: 19px;"></i>
+                                            <a href="{% url 'dashboard' %}?path={{ media_path }}/{{ item.name }}">{{ item.name }}</a>
+                                        {% else %}
+                                            <i class="far fa-file-alt" style="color: #00aeef;"></i>
+                                            {{ item.name }}
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ item.type }}</td>
+                                    <td>{{ item.modified|date:"F j, Y" }}</td>
+                                    <td>{{ item.size }}</td>
+                                    <td>
+                                        <button class="btn btn-light" type="button">
+                                            <i class="fas fa-ellipsis-v" style="color: #00aeef;"></i>
+                                        </button>
+                                    </td>
                                 </tr>
-                                <tr>
-                                    <td><i class="far fa-file-alt" style="color: #00aeef;"></i>&nbsp;ATM-Test Case.csv<span></span></td>
-                                    <td>csv</td>
-                                    <td>June 10,2024</td>
-                                    <td>4kb</td>
-                                    <td><button class="btn btn-light" type="button"><i class="fas fa-ellipsis-v" style="color: #00aeef;"></i></button></td>
-                                </tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>
@@ -159,7 +114,47 @@ Coop Repo
     </div>
 </div>
 
+<!-- Create Folder Modal -->
+<div class="modal fade" id="createFolderModal" tabindex="-1" aria-labelledby="createFolderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createFolderModalLabel">Create New Folder</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {{ folder_form.as_p }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" name="create_folder" class="btn btn-primary">Create Folder</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-
-
+<!-- Upload File Modal -->
+<div class="modal fade" id="uploadFileModal" tabindex="-1" aria-labelledby="uploadFileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadFileModalLabel">Upload File</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {{ file_form.as_p }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" name="upload_file" class="btn btn-primary">Upload File</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
