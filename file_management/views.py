@@ -5,6 +5,13 @@ import os
 from django.conf import settings
 from django.http import JsonResponse
 from .forms import FolderCreationForm, FileUploadForm
+from django.http import HttpResponse
+import os
+import shutil
+
+import tempfile
+import zipfile
+from django.http import HttpResponse
 
 def login_view(request):
     if request.method == 'POST':
@@ -124,3 +131,106 @@ def dashboard(request):
         'file_form': file_form,
     }
     return render(request, 'file_management/dashboard.html', context)
+
+
+
+def delete_folder(request):
+    if request.method == 'GET':
+        # Extract folder name from the request GET parameters
+        folder_name = request.GET.get('name')
+        # Extract folder path from the request GET parameters
+        folder_path = request.GET.get('path')
+        
+        # Debugging print
+        print("Folder name:", folder_name)
+        print("Folder path:", folder_path)
+
+        # Construct the full folder path using the base media root path and the folder path
+        full_folder_path = os.path.join(settings.MEDIA_ROOT, folder_path.strip('/'), folder_name)
+        # Check if the folder exists
+        if os.path.exists(full_folder_path):
+            # Delete the folder and all its contents recursively
+            shutil.rmtree(full_folder_path)
+        # Redirect back to the dashboard or any other appropriate page
+        return redirect('dashboard')
+
+
+
+# Download Folder
+def download_folder(request):
+    if request.method == 'GET':
+        # Extract folder name from the request GET parameters
+        folder_name = request.GET.get('name')
+        # Extract folder path from the request GET parameters
+        folder_path = request.GET.get('path')
+        # Construct the full folder path using the base media root path and the folder name
+        full_folder_path = os.path.join(settings.MEDIA_ROOT, folder_path.strip('/'), folder_name)
+
+        print("Full folder path:", full_folder_path)
+
+        # Create a temporary directory to store the zip file
+        temp_dir = tempfile.mkdtemp()
+        # Create a temporary zip file
+        zip_file_path = os.path.join(temp_dir, f"{folder_name}.zip")
+
+        # Create a zip file and add the contents of the folder and its subfolders to it
+        with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for root, dirs, files in os.walk(full_folder_path):
+                print("Root:", root)
+                print("Dirs:", dirs)
+                print("Files:", files)
+                # Add all files in the current directory
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    rel_path = os.path.relpath(file_path, full_folder_path)
+                    zipf.write(file_path, rel_path)
+                # Add all subdirectories
+                for dir in dirs:
+                    dir_path = os.path.join(root, dir)
+                    rel_path = os.path.relpath(dir_path, full_folder_path)
+                    zipf.write(dir_path, rel_path)
+
+        # Read the zip file as binary data
+        with open(zip_file_path, 'rb') as f:
+            zip_data = f.read()
+
+        # Delete the temporary directory and zip file
+        shutil.rmtree(temp_dir)
+
+        # Prepare the response with the zip file as an attachment
+        response = HttpResponse(zip_data, content_type='application/zip')
+        response['Content-Disposition'] = f'attachment; filename="{folder_name}.zip"'
+        return response
+    
+
+    
+def delete_file(request):
+    if request.method == 'GET':
+        # Extract file name from the request GET parameters
+        file_name = request.GET.get('name')
+        # Extract folder path from the request GET parameters
+        folder_path = request.GET.get('path')
+        # Debugging statements
+        print("File name:", file_name)
+        print("Folder path:", folder_path)
+        # Construct the full file path using the folder path and file name
+        full_file_path = os.path.join(settings.MEDIA_ROOT, folder_path.lstrip('/'), file_name)
+        # Debugging statement
+        print("Full file path:", full_file_path)
+        # Check if the file exists
+        if os.path.exists(full_file_path):
+            # Delete the file
+            os.remove(full_file_path)
+        # Redirect back to the dashboard or any other appropriate page
+        return redirect('dashboard')
+
+def view_file(request):
+    pass
+
+# Download File
+def download_file(request):
+   pass
+
+# Open File
+def open_file(request):
+    pass

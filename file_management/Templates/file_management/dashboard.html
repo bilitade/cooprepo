@@ -99,9 +99,23 @@ Coop Repo
                                     <td>{{ item.modified|date:"F j, Y" }}</td>
                                     <td>{{ item.size }}</td>
                                     <td>
-                                        <button class="btn btn-light" type="button">
-                                            <i class="fas fa-ellipsis-v" style="color: #00aeef;"></i>
-                                        </button>
+                                        <div class="dropdown">
+                                            <button class="btn btn-light" type="button" id="dropdownMenuButton{{ forloop.counter }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="fas fa-ellipsis-v" style="color: #00aeef;"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton{{ forloop.counter }}">
+                                                {% if item.type == 'Folder' %}
+                                                    <li><a class="dropdown-item" href="{% url 'delete_folder' %}?path={{ media_path }}&name={{ item.name }}">Delete Folder</a></li>
+                                                    <li><a class="dropdown-item" href="{% url 'download_folder' %}?path={{ media_path }}&name={{ item.name }}">Download Folder</a></li>
+                                                {% else %}
+                                                    <li><a class="dropdown-item" href="{% url 'delete_file' %}?path={{ media_path }}&name={{ item.name }}">Delete File</a></li>
+                                                    <li><a class="dropdown-item" href="{% url 'view_file' %}?path={{ media_path }}&name={{ item.name }}">View File</a></li>
+                                                    <li><a class="dropdown-item" href="{% url 'download_file' %}?path={{ media_path }}&name={{ item.name }}">Download File</a></li>
+                                                    <li><a class="dropdown-item" href="{% url 'open_file' %}?path={{ media_path }}&name={{ item.name }}">Open File</a></li>
+                                                {% endif %}
+                                            </ul>
+                                        </div>
+                                        
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -129,7 +143,7 @@ Coop Repo
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" name="create_folder" class="btn btn-primary">Create Folder</button>
+                    <button type="submit" name="create_folder" class="btn btn-primary"  style="background: #00aeef;">Create Folder</button>
                 </div>
             </form>
         </div>
@@ -151,10 +165,11 @@ Coop Repo
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" name="upload_file" class="btn btn-primary">Upload File</button>
+                    <button type="submit" name="upload_file"   class="btn btn-primary"  style="background: #00aeef;">Upload File</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
 {% endblock %}

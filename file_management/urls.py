@@ -6,4 +6,11 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('', views.login_view),  # Redirect root URL to login view
+
+    path('delete_folder/', views.delete_folder, name='delete_folder'),
+    path('download_folder/', views.download_folder, name='download_folder'),
+    path('delete_file/', views.delete_file, name='delete_file'),
+    path('view_file/', views.view_file, name='view_file'),
+    path('download_file/', views.download_file, name='download_file'),
+    path('open_file/', views.open_file, name='open_file'),
 ]
