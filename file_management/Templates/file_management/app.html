@@ -21,13 +21,11 @@
                     <div class="sidebar-brand-text mx-3"></div>
                 </a>
                 <hr class="sidebar-divider my-0">
-                <ul class="navbar-nav text-light" id="accordionSidebar">
-                    <li class="nav-item"><a class="nav-link active" href="{% url 'dashboard'%}"><i class="far fa-file-alt"></i><span>File Management</span></a></li>
-                    <li class="nav-item"></li>
-                    <li class="nav-item"><a class="nav-link" href="table.html"></a></li>
-                    <li class="nav-item"><a class="nav-link" href="login.html"></a></li>
-                    <li class="nav-item"></li>
-                </ul>
+                <ul class="navbar-nav text-light mt-4 " id="accordionSidebar">
+                    <li class="nav-item mt-4"><a class="nav-link active text-center" href="{% url 'dashboard'%}"><i style="font-size: 20px" class="far fa-file-alt"></i><span> Files</span></a></li>
+                    <li class="nav-item mt-2"><a class="nav-link active text-center" href="{% url 'dashboard'%}"><i style="font-size: 20px"  class="fas fa-user"></i><span> Users</span></a></li>
+                    <li class="nav-item mt-2"><a class="nav-link active text-center" href="{% url 'dashboard'%}"><i style="font-size: 20px" class="fas fa-info"></i><span> About</span></a></li>
+                   
                 <div class="text-center d-none d-md-inline"><button class="btn rounded-circle border-0" id="sidebarToggle" type="button"></button></div>
             </div>
         </nav>
