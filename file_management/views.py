@@ -1,11 +1,17 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import permission_required
+from django.contrib import messages
+from django import forms
+from django.contrib.auth.forms import SetPasswordForm
 import os
+from .forms import CustomPasswordResetForm;
 from django.conf import settings
-from django.http import JsonResponse
+
 from .forms import FolderCreationForm, FileUploadForm
 from django.http import HttpResponse
+from django.shortcuts import render
+from django.contrib.auth.models import User
 import os
 import shutil
 import mimetypes
@@ -14,7 +20,10 @@ import zipfile
 import webbrowser
 from django.http import HttpResponse
 from datetime import datetime
-
+from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth import views as auth_views
+from django.contrib.auth.decorators import login_required
+from .decorators import user_passes_permission_required
 
 
 def login_view(request):
@@ -46,65 +55,6 @@ def generate_breadcrumbs(path):
 
 
 @login_required
-
-
-# def dashboard(request):
-#     path = request.GET.get('path', '')
-#     media_path = os.path.join(settings.MEDIA_ROOT, path.strip('/'))
-#     if not os.path.exists(media_path):
-#         media_path = settings.MEDIA_ROOT
-
-#     def format_size(size):
-#         # Convert size from bytes to kilobytes
-#         return f"{size / 1024:.2f} KB" if size != '-' else size
-
-#     items = []
-#     with os.scandir(media_path) as it:
-#         for entry in it:
-#             size = entry.stat().st_size if entry.is_file() else '-'
-#             formatted_size = format_size(size)
-#             items.append({
-#                 'name': entry.name,
-#                 'type': 'Folder' if entry.is_dir() else 'File',
-#                 'modified': entry.stat().st_mtime,
-#                 'size': formatted_size,
-#             })
-
-#     if request.method == 'POST':
-#         if 'create_folder' in request.POST:
-#             folder_form = FolderCreationForm(request.POST)
-#             if folder_form.is_valid():
-#                 folder_name = folder_form.cleaned_data['folder_name']
-#                 new_folder_path = os.path.join(media_path, folder_name)
-#                 os.makedirs(new_folder_path, exist_ok=True)
-#                 return redirect(request.path + f'?path={path}')
-#         else:
-#             folder_form = FolderCreationForm()
-
-#         if 'upload_file' in request.POST:
-#             file_form = FileUploadForm(request.POST, request.FILES)
-#             if file_form.is_valid():
-#                 uploaded_file = file_form.cleaned_data['file']
-#                 file_path = os.path.join(media_path, uploaded_file.name)
-#                 with open(file_path, 'wb+') as destination:
-#                     for chunk in uploaded_file.chunks():
-#                         destination.write(chunk)
-#                 return redirect(request.path + f'?path={path}')
-#         else:
-#             file_form = FileUploadForm()
-#     else:
-#         folder_form = FolderCreationForm()
-#         file_form = FileUploadForm()
-
-#     breadcrumbs = generate_breadcrumbs(path)
-#     context = {
-#         'items': items,
-#         'media_path': path,
-#         'breadcrumbs': breadcrumbs,
-#         'folder_form': folder_form,
-#         'file_form': file_form,
-#     }
-#     return render(request, 'file_management/dashboard.html', context)
 def dashboard(request):
     path = request.GET.get('path', '')
     media_path = os.path.join(settings.MEDIA_ROOT, path.strip('/'))
@@ -160,14 +110,30 @@ def dashboard(request):
 
     breadcrumbs = generate_breadcrumbs(path)
     context = {
-        'items': items,
-        'media_path': path,
-        'breadcrumbs': breadcrumbs,
-        'folder_form': folder_form,
-        'file_form': file_form,
-    }
+    'items': items,
+    'media_path': path,
+    'breadcrumbs': breadcrumbs,
+    'folder_form': folder_form,
+    'file_form': file_form,
+    'user': request.user,
+    'can_upload_file': request.user.has_perm('auth.can_upload_file'),
+    'can_create_folder': request.user.has_perm('auth.can_create_folder'),
+    'can_delete': request.user.has_perm('auth.can_delete'),
+    'can_ban_user': request.user.has_perm('auth.can_ban_user'),
+    'can_approve_user': request.user.has_perm('auth.can_approve_user'),
+    'can_delete_user': request.user.has_perm('auth.can_delete_user'),
+    'can_view': request.user.has_perm('auth.can_view'),
+    'can_download': request.user.has_perm('auth.can_download'),
+    'can_create_user': request.user.has_perm('auth.can_create_user')
+}
+
+
+    print(context.items)
+
     return render(request, 'file_management/dashboard.html', context)
 
+@login_required
+@permission_required("auth.can_delete")
 def delete_folder(request):
     if request.method == 'GET':
         # Extract folder name from the request GET parameters
@@ -191,6 +157,8 @@ def delete_folder(request):
 
 
 # Download Folder
+@login_required
+@permission_required("auth.can_download")
 def download_folder(request):
     if request.method == 'GET':
         # Extract folder name from the request GET parameters
@@ -236,7 +204,8 @@ def download_folder(request):
         response['Content-Disposition'] = f'attachment; filename="{folder_name}.zip"'
         return response
     
-
+@login_required
+@permission_required('auth.can_delete')
     
 def delete_file(request):
     if request.method == 'GET':
@@ -284,6 +253,7 @@ def view_file(request):
 
     # Placeholder response if the request method is not GET
     return HttpResponse('File View Initiated')
+
 def download_file(request):
     if request.method == 'GET':
         # Extract file name from the request GET parameters
@@ -300,6 +270,8 @@ def download_file(request):
 def logout_view(request):
     logout(request)
     return redirect('login')  # Redirect to login page after logout
+
+
 
 def search(request):
 
@@ -331,3 +303,11 @@ def search(request):
                     })
 
     return render(request, 'file_management/search_list.html', {'items': results, 'query': query})
+
+
+def load_users(request):
+    users = User.objects.all().order_by('-date_joined')
+    context = {
+        'users': users
+    }
+    return render(request, 'file_management/users.html', context)

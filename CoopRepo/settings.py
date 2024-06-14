@@ -30,6 +30,17 @@ ALLOWED_HOSTS = ['10.1.15.132', 'localhost', '127.0.0.1']
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+
+
+# Email Configuration using Google SMTP
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'coopgitlab@gmail.com'  # Replace with your Gmail address
+EMAIL_HOST_PASSWORD = 'vupt tdhk ftce iqwz'  # Replace with your Gmail password or app-specific password
+DEFAULT_FROM_EMAIL = 'coopgitlab@gmail.com'  # Replace with your Gmail address
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -71,6 +82,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'file_management.context_processors.user_info'
             ],
         },
     },

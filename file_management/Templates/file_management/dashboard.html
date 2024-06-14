@@ -33,12 +33,20 @@ Coop Repo
                     </div>
                     <div class="row">
                         <div class="col" style="border-radius: 2px;border-top-left-radius: 1px;border-top-right-radius: 1px;border-bottom-right-radius: 1px;border-bottom-left-radius: 1px;border-style: solid;border-color: rgb(228,229,233);">
-                            <button class="btn btn-light btn-sm px-3 mx-2" data-bs-toggle="modal" data-bs-target="#createFolderModal">
+                             
+                            
+                            
+                        
+                            <button class="btn btn-light btn-sm px-3 mx-2 {% if not can_upload_file %}disabled{% endif %} " data-bs-toggle="modal" data-bs-target="#createFolderModal">
                                 <i class="fas fa-folder-plus" style="color: #00aeef;font-size: 20px;"></i>
                             </button>
-                            <button class="btn btn-light btn-sm px-3" data-bs-toggle="modal" data-bs-target="#uploadFileModal" style="font-size: 20px;">
+                            <button class="btn btn-light btn-sm px-3 {% if not can_create_folder %}disabled{% endif %} " data-bs-toggle="modal" data-bs-target="#uploadFileModal" style="font-size: 20px;">
                                 <i class="fas fa-file-upload" style="color: #00aeef;"></i>
                             </button>
+
+
+
+
                         </div>
                     </div>
                 </div>
@@ -79,10 +87,18 @@ Coop Repo
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton{{ forloop.counter }}">
                                                 {% if item.type == 'Folder' %}
-                                                    <li><a class="dropdown-item" href="{% url 'delete_folder' %}?path={{ media_path }}&name={{ item.name }}">Delete Folder</a></li>
+
+                                                <li><a class="dropdown-item {% if not can_delete %}disabled{% endif %}" href="{% url 'delete_folder' %}?path={{ media_path }}&name={{ item.name }}" {% if not can_delete %}tabindex="-1" aria-disabled="true"{% endif %}>Delete Folder</a></li>
+                                                
+                                                   
                                                     <li><a class="dropdown-item" href="{% url 'download_folder' %}?path={{ media_path }}&name={{ item.name }}">Download Folder</a></li>
                                                 {% else %}
-                                                    <li><a class="dropdown-item" href="{% url 'delete_file' %}?path={{ media_path }}&name={{ item.name }}">Delete File</a></li>
+
+                                                 
+
+                                                       
+                                                <li><a class="dropdown-item {% if not can_delete %}disabled{% endif %}"  href="{% url 'delete_file' %}?path={{ media_path }}&name={{ item.name }}" {% if not can_delete %}tabindex="-1" aria-disabled="true"{% endif %}>Delete File</a></li>
+                                                    
                                                     <li><a class="dropdown-item" href="{% url 'view_file' %}?path={{ media_path }}&name={{ item.name }}">View File</a></li>
                                                     <li><a class="dropdown-item" href="{% url 'download_file' %}?path={{ media_path }}&name={{ item.name }}">Download File</a></li>
                                                 {% endif %}
