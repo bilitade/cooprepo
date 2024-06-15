@@ -28,9 +28,9 @@
                 <hr class="sidebar-divider my-0">
                 <ul class="navbar-nav text-light mt-4 " id="accordionSidebar">
                     <li class="nav-item mt-4"><a class="nav-link active text-center" href="{% url 'dashboard'%}"><i style="font-size: 20px" class="far fa-file-alt"></i><span> Files</span></a></li>
+                   {% if can_approve_user %}
                     <li class="nav-item mt-2"><a class="nav-link active text-center" href="{% url 'users'%}"><i style="font-size: 20px"  class="fas fa-user"></i><span> Users</span></a></li>
-                    
-                    
+                    {% endif %}
                    
                 <div class="text-center d-none d-md-inline"><button class="btn rounded-circle border-0" id="sidebarToggle" type="button"></button></div>
             </div>
@@ -41,7 +41,7 @@
             </div>
             <footer class="bg-white sticky-footer">
                 <div class="container my-auto">
-                    <div class="text-center my-auto copyright"><span>Cooperative Bank of Oromia&nbsp;</span></div>
+                    <div class="text-center my-auto copyright"><span>2024 © Cooperative Bank of Oromia&nbsp;</span></div>
                 </div>
             </footer>
         </div><a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>

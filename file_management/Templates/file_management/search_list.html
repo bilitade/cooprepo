@@ -19,7 +19,10 @@ Coop Repo
     <div class="row">
         <div class="col" style="box-shadow: 0px 0px;">
             <div class="row">
-               <h6 class="text-center">  <i class="fas fa-search" style="color: #00aeef;font-size: 20px;"></i>Search Results for "{{ query }}"<h6>
+                <h6 class="text-center">
+                    <i class="fas fa-search" style="color: #00aeef; font-size: 20px;"></i>
+                    Search Results for "{{ query }}"
+                </h6>
             </div>
 
             <div class="row">
@@ -30,10 +33,9 @@ Coop Repo
                             <thead class="thead-dark">
                                 <tr>
                                     <th>Name</th>
-                                    <th>Type&nbsp;</th>
+                                    <th>Type</th>
                                     <th>Modified Date</th>
-                                    <th>Size&nbsp;</th>
-                                    <th></th>
+                                    <th>Size</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -41,33 +43,16 @@ Coop Repo
                                 <tr>
                                     <td>
                                         {% if item.type == 'Folder' %}
-                                            <i class="far fa-folder" style="color: #00aeef;font-size: 19px;"></i>
-                                            <a href="{% url 'dashboard' %}?path={{ item.name }}">{{ item.name }}</a>
+                                            <i class="far fa-folder" style="color: #00aeef; font-size: 19px;"></i>
+                                            <a href="{% url 'dashboard' %}?path={{ item.relative_path }}">{{ item.name }}</a>
                                         {% else %}
                                             <i class="far fa-file-alt" style="color: #00aeef;"></i>
-                                            {{ item.name }}
+                                            <a href="{% url 'download' %}?path={{ item.relative_path }}">{{ item.name }}</a>
                                         {% endif %}
                                     </td>
                                     <td>{{ item.type }}</td>
                                     <td>{{ item.modified }}</td>
                                     <td>{{ item.size }}</td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-light" type="button" id="dropdownMenuButton{{ forloop.counter }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <i class="fas fa-ellipsis-v" style="color: #00aeef;"></i>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton{{ forloop.counter }}">
-                                                {% if item.type == 'Folder' %}
-                                                    <li><a class="dropdown-item" href="{% url 'delete_folder' %}?path={{ item.name }}">Delete Folder</a></li>
-                                                    <li><a class="dropdown-item" href="{% url 'download_folder' %}?path={{ item.name }}">Download Folder</a></li>
-                                                {% else %}
-                                                    <li><a class="dropdown-item" href="{% url 'delete_file' %}?path={{ item.name }}">Delete File</a></li>
-                                                    <li><a class="dropdown-item" href="{% url 'view_file' %}?path={{ item.name }}">View File</a></li>
-                                                    <li><a class="dropdown-item" href="{% url 'download_file' %}?path={{ item.name }}">Download File</a></li>
-                                                {% endif %}
-                                            </ul>
-                                        </div>
-                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>

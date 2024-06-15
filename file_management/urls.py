@@ -13,7 +13,8 @@ urlpatterns = [
     path('delete_file/', views.delete_file, name='delete_file'),
     path('view_file/', views.view_file, name='view_file'),
     path('download_file/', views.download_file, name='download_file'),
-     path('search/', views.search, name='search'),
+    path('search/', views.search_files, name='search'),
+     path('download/', views.download, name='download'),
      path('users/', views.load_users, name="users"),
 
      path('password_reset/', auth_views.PasswordResetView.as_view(template_name='passwordreset/password_reset_form.html'), name='password_reset'),

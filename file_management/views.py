@@ -5,6 +5,7 @@ from django.contrib import messages
 from django import forms
 from django.contrib.auth.forms import SetPasswordForm
 import os
+from django.http import HttpResponse, Http404
 from .forms import CustomPasswordResetForm;
 from django.conf import settings
 
@@ -109,6 +110,8 @@ def dashboard(request):
         file_form = FileUploadForm()
 
     breadcrumbs = generate_breadcrumbs(path)
+    user_groups = request.user.groups.values_list('name', flat=True) if request.user.is_authenticated else []
+    
     context = {
     'items': items,
     'media_path': path,
@@ -124,7 +127,8 @@ def dashboard(request):
     'can_delete_user': request.user.has_perm('auth.can_delete_user'),
     'can_view': request.user.has_perm('auth.can_view'),
     'can_download': request.user.has_perm('auth.can_download'),
-    'can_create_user': request.user.has_perm('auth.can_create_user')
+    'can_create_user': request.user.has_perm('auth.can_create_user'),
+    'user_group':user_groups
 }
 
 
@@ -273,15 +277,13 @@ def logout_view(request):
 
 
 
-def search(request):
-
+def search_files(request):
     def format_size(size):
-        # Convert size from bytes to kilobytes
         return f"{size / 1024:.2f} KB" if size != '-' else size
 
     def format_date(timestamp):
-        # Convert timestamp to a readable date format
         return datetime.fromtimestamp(timestamp).strftime('%B %d, %Y')
+
     query = request.GET.get('query', '').strip()
     media_path = settings.MEDIA_ROOT
     results = []
@@ -291,23 +293,41 @@ def search(request):
             for name in dirs + files:
                 if query.lower() in name.lower():
                     full_path = os.path.join(root, name)
+                    relative_path = os.path.relpath(full_path, media_path)
                     is_file = os.path.isfile(full_path)
-                    size = os.path.getsize(full_path) if is_file else '-'
-                    modified = format_date(os.path.getmtime(full_path))
-                    formatted_size = format_size(size)
-                    results.append({
-                        'name': name,
-                        'type': 'File' if is_file else 'Folder',
-                        'modified': modified,
-                        'size': formatted_size,
-                    })
+                    try:
+                        size = os.path.getsize(full_path) if is_file else '-'
+                        modified = format_date(os.path.getmtime(full_path))
+                        formatted_size = format_size(size)
+                        results.append({
+                            'name': name,
+                            'type': 'File' if is_file else 'Folder',
+                            'modified': modified,
+                            'size': formatted_size,
+                            'relative_path': relative_path,
+                        })
+                    except OSError as e:
+                        # Handle the error if the file does not exist or permission is denied
+                        print(f"Error accessing file {full_path}: {e}")
 
     return render(request, 'file_management/search_list.html', {'items': results, 'query': query})
 
+def download(request):
+    path = request.GET.get('path', '')
+    file_path = os.path.join(settings.MEDIA_ROOT, path)
+
+    if os.path.exists(file_path):
+        with open(file_path, 'rb') as file:
+            response = HttpResponse(file.read(), content_type='application/octet-stream')
+            response['Content-Disposition'] = f'attachment; filename={os.path.basename(file_path)}'
+            return response
+    else:
+        raise Http404("File does not exist")
 
 def load_users(request):
     users = User.objects.all().order_by('-date_joined')
     context = {
-        'users': users
+        'users': users,
+         
     }
     return render(request, 'file_management/users.html', context)
