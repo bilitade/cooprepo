@@ -1,10 +1,9 @@
 from django.core.management.base import BaseCommand
-from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.models import User
 
 class Command(BaseCommand):
-    help = 'Set up roles and permissions'
+    help = 'Set up roles, permissions, and demo users'
 
     def handle(self, *args, **options):
         permissions = [
@@ -56,4 +55,24 @@ class Command(BaseCommand):
                 permission = Permission.objects.get(codename=perm)
                 group.permissions.add(permission)
 
-        self.stdout.write(self.style.SUCCESS('Successfully set up roles and permissions'))
+        # Create demo users
+        demo_users = {
+            'superadmin': {'username': 'superadmin', 'email': 'superadmin@example.com', 'password': '12345678', 'is_superuser': True, 'is_staff': True},
+            'admin': {'username': 'admin', 'email': 'admin@example.com', 'password': '12345678', 'groups': ['Admin']},
+            'editor': {'username': 'editor', 'email': 'editor@example.com', 'password': '12345678', 'groups': ['Editor']},
+            'staff': {'username': 'staff', 'email': 'staff@example.com', 'password': '12345678', 'groups': ['Staff']},
+        }
+
+        for user_key, user_data in demo_users.items():
+            user, created = User.objects.get_or_create(username=user_data['username'], defaults={'email': user_data['email']})
+            if created:
+                user.set_password(user_data['password'])
+                user.is_superuser = user_data.get('is_superuser', False)
+                user.is_staff = user_data.get('is_staff', False)
+                user.save()
+                if 'groups' in user_data:
+                    for group_name in user_data['groups']:
+                        group = Group.objects.get(name=group_name)
+                        user.groups.add(group)
+        
+        self.stdout.write(self.style.SUCCESS('Successfully set up roles, permissions, and demo users'))

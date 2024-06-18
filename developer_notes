@@ -1,5 +1,7 @@
-python manage.py setup_roles_permissions  - create role and permission of users
 
-vupt tdhk ftce iqwz
+python3 manage.py  migrate  - to push the migration to table 
+python3 manage.py setup_roles_permissions_users - create role, permission and demo users
+python3 manage.py cleanup_roles_permissions_users - cleanup role, permission and demo users
 
-7yRSug_4_UXNXZx
+app password for gmail smtp:   "vupt tdhk ftce iqwz"
+
