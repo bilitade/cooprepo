@@ -1,33 +1,26 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import permission_required
-from django.contrib import messages
-from django import forms
-from django.contrib.auth.forms import SetPasswordForm
-import os
+from django.contrib.auth.decorators import permission_required,login_required
 from django.http import HttpResponse, Http404
-from .forms import CustomPasswordResetForm;
-from django.conf import settings
-
-from .forms import FolderCreationForm, FileUploadForm
-from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth.models import User
+from django.conf import settings
+from .forms import FolderCreationForm, FileUploadForm
+from datetime import datetime
 import os
 import shutil
 import mimetypes
 import tempfile
 import zipfile
 import webbrowser
-from django.http import HttpResponse
-from datetime import datetime
-from django.contrib.auth.forms import PasswordResetForm
-from django.contrib.auth import views as auth_views
-from django.contrib.auth.decorators import login_required
-from .decorators import user_passes_permission_required
 
 
 def login_view(request):
+
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+
+    
     if request.method == 'POST':
         email = request.POST.get('email').lower()  # Convert email to lowercase
         password = request.POST.get('password')
@@ -40,6 +33,8 @@ def login_view(request):
             error_message = 'Invalid email or password.'
             return render(request, 'file_management/login.html', {'error_message': error_message})
     return render(request, 'file_management/login.html')
+
+
 def logout_view(request):
     logout(request)
     return redirect('login')
@@ -136,6 +131,7 @@ def dashboard(request):
 
     return render(request, 'file_management/dashboard.html', context)
 
+#delete folder
 @login_required
 @permission_required("auth.can_delete")
 def delete_folder(request):
@@ -157,7 +153,6 @@ def delete_folder(request):
             shutil.rmtree(full_folder_path)
         # Redirect back to the dashboard or any other appropriate page
         return redirect('dashboard')
-
 
 
 # Download Folder
@@ -207,7 +202,7 @@ def download_folder(request):
         response = HttpResponse(zip_data, content_type='application/zip')
         response['Content-Disposition'] = f'attachment; filename="{folder_name}.zip"'
         return response
-    
+#delete file
 @login_required
 @permission_required('auth.can_delete')
     
@@ -230,6 +225,8 @@ def delete_file(request):
             os.remove(full_file_path)
         # Redirect back to the dashboard or any other appropriate page
         return redirect('dashboard')
+    
+    
 def view_file(request):
     if request.method == 'GET':
         # Extract file name from the request GET parameters
@@ -312,6 +309,8 @@ def search_files(request):
 
     return render(request, 'file_management/search_list.html', {'items': results, 'query': query})
 
+#download file  in search view
+
 def download(request):
     path = request.GET.get('path', '')
     file_path = os.path.join(settings.MEDIA_ROOT, path)
@@ -323,7 +322,8 @@ def download(request):
             return response
     else:
         raise Http404("File does not exist")
-
+    
+#load user to the interface 
 def load_users(request):
     users = User.objects.all().order_by('-date_joined')
     context = {

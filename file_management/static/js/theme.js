@@ -73,4 +73,13 @@
     });
   }
 
+  // Add event listeners to menu items to prevent sidebar toggling
+  var menuItems = document.querySelectorAll('.sidebar .nav-item .nav-link');
+  
+  for (var menuItem of menuItems) {
+    menuItem.addEventListener('click', function(e) {
+      e.stopPropagation();
+    });
+  }
+
 })(); // End of use strict
