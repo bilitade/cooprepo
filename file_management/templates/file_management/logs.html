@@ -1,0 +1,79 @@
+{% extends 'file_management/app.html' %}
+
+{% block title %}
+Coop Repo
+{% endblock %}
+
+{% block additional_css %}
+<style>
+    /* Add additional CSS specific to the dashboard page */
+    #log-content {
+        white-space: pre;  /* Preserve whitespace and formatting */
+        overflow-x: auto;  /* Enable horizontal scrolling */
+        height: 500px;     /* Set a fixed height */
+        padding: 10px;     /* Add some padding */
+        background-color: #f8f9fa;  /* Light background for better readability */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% include 'file_management/navbar.html' %}
+{% load static %}
+<div class="container-fluid">
+    <div class="d-sm-flex justify-content-between align-items-center mb-4"></div>
+    <div class="row">
+        <!-- User Activity Logs Section -->
+        <div class="col-xs-12 col-lg-3" style="box-shadow: 0px 0px;">
+            <h6>User Activity Logs</h6>
+            <ul class="list-group">
+                {% for log in logs %}
+                    <li class="list-group-item">
+                        <a href="#" class="log-link" data-log-name="{{ log }}">{{ log }}</a>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item">No logs found.</li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <!-- Log Preview Section -->
+        <div class="col-xs-12 col-lg-9" style="box-shadow: 0px 0px;">
+            <h6 class="text-center">Log Preview</h6>
+            <div class="row">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="log-content">
+                                Select a log file to preview its content.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.log-link').forEach(function(link) {
+        link.addEventListener('click', function(event) {
+            event.preventDefault();
+            const logName = this.dataset.logName;
+            fetch(`/logs/${logName}/`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('log-content').textContent = data.content;
+                })
+                .catch(error => {
+                    console.error('Error fetching log content:', error);
+                    document.getElementById('log-content').textContent = 'Error loading log content.';
+                });
+        });
+    });
+});
+</script>
+
+{% endblock %}

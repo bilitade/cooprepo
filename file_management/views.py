@@ -13,14 +13,14 @@ import mimetypes
 import tempfile
 import zipfile
 import webbrowser
+from .user_activity_logger import track_user_activity 
+from django.http import JsonResponse
 
 
 def login_view(request):
-
     if request.user.is_authenticated:
         return redirect('dashboard')
 
-    
     if request.method == 'POST':
         email = request.POST.get('email').lower()  # Convert email to lowercase
         password = request.POST.get('password')
@@ -28,6 +28,7 @@ def login_view(request):
         user = authenticate(request, email=email, password=password)  # Use lowercase email as the username
         if user is not None:
             login(request, user)
+            track_user_activity(username=user.username, action=f'with email "{user.email}" logged into The System')  # Log user login
             return redirect('dashboard')  # Redirect to dashboard page after successful login
         else:
             error_message = 'Invalid email or password.'
@@ -36,9 +37,13 @@ def login_view(request):
 
 
 def logout_view(request):
+    # Capture the username and email before logging out
+    
+    username = request.user.username
+    track_user_activity(username=username, action=f' logged out of the system')
+
     logout(request)
     return redirect('login')
-
 
 
 def generate_breadcrumbs(path):
@@ -85,6 +90,7 @@ def dashboard(request):
                 folder_name = folder_form.cleaned_data['folder_name']
                 new_folder_path = os.path.join(media_path, folder_name)
                 os.makedirs(new_folder_path, exist_ok=True)
+                track_user_activity(username=request.user.username, action=f' Created  Folder:"{folder_name}" to path:- {new_folder_path}')
                 return redirect(request.path + f'?path={path}')
         else:
             folder_form = FolderCreationForm()
@@ -97,7 +103,9 @@ def dashboard(request):
                 with open(file_path, 'wb+') as destination:
                     for chunk in uploaded_file.chunks():
                         destination.write(chunk)
+                track_user_activity(username=request.user.username, action=f' Uploaded File :"{uploaded_file.name}" to path:- {file_path }')
                 return redirect(request.path + f'?path={path}')
+            
         else:
             file_form = FileUploadForm()
     else:
@@ -151,6 +159,8 @@ def delete_folder(request):
         if os.path.exists(full_folder_path):
             # Delete the folder and all its contents recursively
             shutil.rmtree(full_folder_path)
+            track_user_activity(username=request.user.username, action=f' Delete Folder:"{folder_name}" and All files within  from path:- {full_folder_path}')
+
         # Redirect back to the dashboard or any other appropriate page
         return redirect('dashboard')
 
@@ -201,6 +211,7 @@ def download_folder(request):
         # Prepare the response with the zip file as an attachment
         response = HttpResponse(zip_data, content_type='application/zip')
         response['Content-Disposition'] = f'attachment; filename="{folder_name}.zip"'
+        track_user_activity(username=request.user.username, action=f'logged out of the system')
         return response
 #delete file
 @login_required
@@ -223,6 +234,8 @@ def delete_file(request):
         if os.path.exists(full_file_path):
             # Delete the file
             os.remove(full_file_path)
+            track_user_activity(username=request.user.username, action=f' Delete file :"{file_name}" from path:- {full_file_path}')
+
         # Redirect back to the dashboard or any other appropriate page
         return redirect('dashboard')
     
@@ -268,9 +281,6 @@ def download_file(request):
             response = HttpResponse(file.read(), content_type='application/force-download')
             response['Content-Disposition'] = 'attachment; filename=%s' % file_name
             return response
-def logout_view(request):
-    logout(request)
-    return redirect('login')  # Redirect to login page after logout
 
 
 
@@ -331,3 +341,19 @@ def load_users(request):
          
     }
     return render(request, 'file_management/users.html', context)
+def load_user_activities(request):
+    logs_dir = os.path.join(settings.BASE_DIR, 'logs/')
+    logs = [f for f in os.listdir(logs_dir) if f.startswith('user_activity_') and f.endswith('.log')]
+    context = {'logs': logs}
+    
+    return render(request, 'file_management/logs.html', context)
+
+def get_log_content(request, log_name):
+    logs_dir = os.path.join(settings.BASE_DIR, 'logs/')
+    log_path = os.path.join(logs_dir, log_name)
+    if os.path.exists(log_path) and log_name.startswith('user_activity_') and log_name.endswith('.log'):
+        with open(log_path, 'r') as file:
+            content = file.read()
+        return JsonResponse({'content': content})
+    else:
+        raise Http404("Log file does not exist.")

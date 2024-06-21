@@ -14,8 +14,10 @@ urlpatterns = [
     path('view_file/', views.view_file, name='view_file'),
     path('download_file/', views.download_file, name='download_file'),
     path('search/', views.search_files, name='search'),
-     path('download/', views.download, name='download'),
-     path('users/', views.load_users, name="users"),
+    path('download/', views.download, name='download'),
+    path('users/', views.load_users, name="users"),
+    path('logs/', views.load_user_activities, name='load_user_activities'),
+    path('logs/<str:log_name>/', views.get_log_content, name='get_log_content'),
 
    # handle password reset using django builtin authentication with custom interface/template
     path('password_reset/', auth_views.PasswordResetView.as_view(template_name='passwordreset/password_reset_form.html'), name='password_reset'),
