@@ -5,3 +5,9 @@ python3 manage.py cleanup_roles_permissions_users - cleanup role, permission and
 
 app password for gmail smtp:   "vupt tdhk ftce iqwz"
 
+--------------------------------------------
+Docker 
+
+Create Dockerfile 
+
+

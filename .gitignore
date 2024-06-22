@@ -1,4 +1,45 @@
-file_management/__pycache__/
+# Ignore the virtual environment directory
+venv/
+
+# Ignore compiled bytecode
 __pycache__/
-media
-logs
+*.py[cod]
+
+# Ignore media files
+media/
+
+# Ignore log files
+logs/
+*.log
+
+# Ignore database files (if using SQLite, for example)
+# *.sqlite3
+
+# Ignore environment variable files (if you use one)
+.env
+
+# Ignore Django migrations
+*/migrations/*.pyc
+*/migrations/*.pyo
+*/migrations/*.log
+*/migrations/__pycache__/
+
+# Ignore files created by IDEs/editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore the __pycache__ directory in any subdirectory
+**/__pycache__/
+
+# Ignore temporary files
+*.tmp
+*.temp
+
+# Ignore file management specific caches and other files
+file_management/__pycache__/
