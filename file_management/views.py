@@ -222,7 +222,7 @@ def delete_file(request):
         
         return redirect('dashboard')
     
-    
+@login_required    
 def view_file(request):
     if request.method == 'GET':
         # Extract file name from the request GET parameters
@@ -250,7 +250,7 @@ def view_file(request):
 
     # Placeholder response if the request method is not GET
     return HttpResponse('File View Initiated')
-
+@login_required
 def download_file(request):
     if request.method == 'GET':
         # Extract file name from the request GET parameters
@@ -266,7 +266,7 @@ def download_file(request):
             return response
 
 
-
+@login_required
 def search_files(request):
     def format_size(size):
         return f"{size / 1024:.2f} KB" if size != '-' else size
@@ -303,7 +303,7 @@ def search_files(request):
     return render(request, 'file_management/search_list.html', {'items': results, 'query': query})
 
 #download file  in search view
-
+@login_required
 def download(request):
     path = request.GET.get('path', '')
     file_path = os.path.join(settings.MEDIA_ROOT, path)
@@ -317,6 +317,7 @@ def download(request):
         raise Http404("File does not exist")
     
 #load user to the interface 
+@login_required
 def load_users(request):
     users = User.objects.all().order_by('-date_joined')
     context = {
@@ -324,6 +325,7 @@ def load_users(request):
          
     }
     return render(request, 'file_management/users.html', context)
+@login_required
 def load_user_activities(request):
     logs_dir = os.path.join(settings.BASE_DIR, 'logs/')
     logs = [f for f in os.listdir(logs_dir) if f.startswith('user_activity_') and f.endswith('.log')]
@@ -333,7 +335,7 @@ def load_user_activities(request):
     
     context = {'logs': logs}
     return render(request, 'file_management/logs.html', context)
-
+@login_required
 def get_log_content(request, log_name):
     logs_dir = os.path.join(settings.BASE_DIR, 'logs/')
     log_path = os.path.join(logs_dir, log_name)
@@ -345,7 +347,7 @@ def get_log_content(request, log_name):
         raise Http404("Log file does not exist.")
     
 
-
+@login_required
 # Trash list view
 def trash_list(request):
     def get_file_size(path):
@@ -387,7 +389,7 @@ def trash_list(request):
         'can_delete': True,  # Update this based on your permission logic
     }
     return render(request, 'file_management/trash.html', context)
-
+@login_required
 # Permanently delete item
 def permanently_delete_item(request):
     item_name = request.GET.get('name')
@@ -403,7 +405,7 @@ def permanently_delete_item(request):
         os.remove(metadata_path)
 
     return redirect('trash_list')
-
+@login_required
 # Restore item
 def restore_item(request):
     item_name = request.GET.get('name')
@@ -422,7 +424,7 @@ def restore_item(request):
 
     return redirect('trash_list')
 
-
+@login_required
 # Download trashed folder
 def download_trashed_folder(request):
     if request.method == 'GET':
@@ -461,7 +463,7 @@ def download_trashed_folder(request):
         response = HttpResponse(zip_data, content_type='application/zip')
         response['Content-Disposition'] = f'attachment; filename="{folder_name}.zip"'
         return response
-    
+@login_required   
 def download_trashed_file(request):
     if request.method == 'GET':
         # Extract file name from the request GET parameters
