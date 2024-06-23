@@ -11,9 +11,17 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i&amp;display=swap">
     <link rel="stylesheet" href="{% static 'fonts/fontawesome-all.min.css' %}">
     <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico'%} ">
-
+    
    
     {% block additional_css %}{% endblock %}
+    <style>
+        /* Global styling for all <a> tags */
+        a {
+            text-decoration: none;
+      
+            color:#08B0F0
+        }
+    </style>
   
 </head>
 
@@ -23,16 +31,16 @@
     <div id="wrapper">
         <nav class="navbar navbar-dark align-items-start sidebar toggled sidebar-dark accordion bg-gradient-primary p-0" style="border-color: var(--bs-navbar-color);background: #00aeef;">
             <div class="container-fluid d-flex flex-column p-0"><a class="navbar-brand d-flex justify-content-center align-items-center sidebar-brand m-0" href="#">
-                    <div><img src="{% static 'img/Group%202%20(2).svg' %}" width="64" height="64"></div>
+                    <div class="pt-2 pl-2 mt-4 ml-4"><img class="" src="{% static 'img/Group%202%20(2).svg' %}" width="64" height="64"></div>
                     <div class="sidebar-brand-text mx-3"></div>
                 </a>
                 <hr class="sidebar-divider my-0">
                 <ul class="navbar-nav text-light mt-4  " id="accordionSidebar">
                     <li class="nav-item mt-4"><a class="nav-link active text-center" href="{% url 'dashboard'%}"><i style="font-size: 20px" class="far fa-file-alt"></i><span> Files</span></a></li>
                    {% if can_approve_user %}
-                    <li class="nav-item mt-2"><a class="nav-link active text-center" href="{% url 'users'%}"><i style="font-size: 20px"  class="fas fa-user"></i><span> Users</span></a></li>
+                    <li class="nav-item mt-2"><a class="nav-link active text-center" href="{% url 'users'%}"><i style="font-size: 20px"  class="fas fa-users"></i><span> Users</span></a></li>
                     <li class="nav-item mt-2"><a class="nav-link active text-center" href="{% url 'load_user_activities'%}"><i style="font-size: 20px"  class="fas fa-history"></i><span> User Activity</span></a></li>
-
+                    <li class="nav-item mt-2"><a class="nav-link active text-center" href="{% url 'trash_list'%}"><i style="font-size: 20px"  class="fas fa-trash"></i><span>Trash</span></a></li>
                     {% endif %}
                    
                 <div class="text-center d-none d-md-inline"><button class="btn rounded-circle border-0" id="sidebarToggle" type="button"></button></div>

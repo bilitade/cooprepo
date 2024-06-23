@@ -11,6 +11,7 @@ urlpatterns = [
     path('delete_folder/', views.delete_folder, name='delete_folder'),
     path('download_folder/', views.download_folder, name='download_folder'),
     path('delete_file/', views.delete_file, name='delete_file'),
+
     path('view_file/', views.view_file, name='view_file'),
     path('download_file/', views.download_file, name='download_file'),
     path('search/', views.search_files, name='search'),
@@ -24,4 +25,13 @@ urlpatterns = [
     path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='passwordreset/password_reset_done.html'), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='passwordreset/password_reset_confirm.html'), name='password_reset_confirm'),
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='passwordreset/password_reset_complete.html'), name='password_reset_complete'),
+
+
+    path('trash_list/', views.trash_list, name='trash_list'),
+    path('restore_item/', views.restore_item, name='restore_item'),
+    path('permanently_delete_item/', views.permanently_delete_item, name='permanently_delete_item'),
+    path('download_trashed_folder/', views.download_trashed_folder, name='download_trashed_folder'),
+    path('download_trashed_file/', views.download_trashed_file, name='download_trashed_file'),
+
+
 ]

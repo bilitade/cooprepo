@@ -31,6 +31,8 @@ ALLOWED_HOSTS = ['10.1.15.132', 'localhost', '127.0.0.1','192.168.14.59']
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+TRASH_DIR = os.path.join(BASE_DIR, 'trash')
+os.makedirs(TRASH_DIR, exist_ok=True)
 
 
 

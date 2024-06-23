@@ -9,5 +9,6 @@ app password for gmail smtp:   "vupt tdhk ftce iqwz"
 Docker 
 
 Create Dockerfile 
-
+docker build -t cooprepo .
+docker run -d -p 8000:8000 cooprepo
 

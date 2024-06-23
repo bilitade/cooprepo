@@ -144,27 +144,18 @@ def dashboard(request):
 @permission_required("auth.can_delete")
 def delete_folder(request):
     if request.method == 'GET':
-        # Extract folder name from the request GET parameters
         folder_name = request.GET.get('name')
-        # Extract folder path from the request GET parameters
         folder_path = request.GET.get('path')
-        
-        # Debugging print
-        print("Folder name:", folder_name)
-        print("Folder path:", folder_path)
-
-        # Construct the full folder path using the base media root path and the folder path
         full_folder_path = os.path.join(settings.MEDIA_ROOT, folder_path.strip('/'), folder_name)
-        # Check if the folder exists
+        trash_folder_path = os.path.join(settings.TRASH_DIR, folder_path.strip('/'), folder_name)
+
         if os.path.exists(full_folder_path):
-            # Delete the folder and all its contents recursively
-            shutil.rmtree(full_folder_path)
-            track_user_activity(username=request.user.username, action=f' Delete Folder:"{folder_name}" and All files within  from path:- {full_folder_path}')
-
-        # Redirect back to the dashboard or any other appropriate page
+            os.makedirs(os.path.dirname(trash_folder_path), exist_ok=True)
+            shutil.move(full_folder_path, trash_folder_path)
+            track_user_activity(username=request.user.username, action=f'Moved Folder: "{folder_name}" to trash from path: {full_folder_path}')
+        
         return redirect('dashboard')
-
-
+    
 # Download Folder
 @login_required
 @permission_required("auth.can_download")
@@ -213,30 +204,22 @@ def download_folder(request):
         response['Content-Disposition'] = f'attachment; filename="{folder_name}.zip"'
         track_user_activity(username=request.user.username, action=f'logged out of the system')
         return response
+    
 #delete file
 @login_required
 @permission_required('auth.can_delete')
-    
 def delete_file(request):
     if request.method == 'GET':
-        # Extract file name from the request GET parameters
         file_name = request.GET.get('name')
-        # Extract folder path from the request GET parameters
         folder_path = request.GET.get('path')
-        # Debugging statements
-        print("File name:", file_name)
-        print("Folder path:", folder_path)
-        # Construct the full file path using the folder path and file name
         full_file_path = os.path.join(settings.MEDIA_ROOT, folder_path.lstrip('/'), file_name)
-        # Debugging statement
-        print("Full file path:", full_file_path)
-        # Check if the file exists
-        if os.path.exists(full_file_path):
-            # Delete the file
-            os.remove(full_file_path)
-            track_user_activity(username=request.user.username, action=f' Delete file :"{file_name}" from path:- {full_file_path}')
+        trash_file_path = os.path.join(settings.TRASH_DIR, folder_path.lstrip('/'), file_name)
 
-        # Redirect back to the dashboard or any other appropriate page
+        if os.path.exists(full_file_path):
+            os.makedirs(os.path.dirname(trash_file_path), exist_ok=True)
+            shutil.move(full_file_path, trash_file_path)
+            track_user_activity(username=request.user.username, action=f'Moved File: "{file_name}" to trash from path: {full_file_path}')
+        
         return redirect('dashboard')
     
     
@@ -357,3 +340,140 @@ def get_log_content(request, log_name):
         return JsonResponse({'content': content})
     else:
         raise Http404("Log file does not exist.")
+    
+
+
+# Trash list view
+def trash_list(request):
+    def get_file_size(path):
+        size = os.path.getsize(path)
+        for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+            if size < 1024:
+                return f"{size:.2f} {unit}"
+            size /= 1024
+
+    def get_trash_date(path):
+        metadata_path = path + '.meta'
+        if os.path.exists(metadata_path):
+            with open(metadata_path, 'r') as meta_file:
+                return meta_file.read().strip()
+        return 'Unknown'
+
+    trash_folder = settings.TRASH_DIR
+    items = []
+
+    for item_name in os.listdir(trash_folder):
+        item_path = os.path.join(trash_folder, item_name)
+        if os.path.isdir(item_path):
+            item_type = 'Folder'
+        else:
+            item_type = 'File'
+
+        item_info = {
+            'name': item_name,
+            'type': item_type,
+            'modified': get_trash_date(item_path),
+            'size': get_file_size(item_path) if item_type == 'File' else '',
+            'relative_path': item_name
+        }
+        items.append(item_info)
+
+    context = {
+        'items': items,
+        'breadcrumbs': [],
+        'can_delete': True,  # Update this based on your permission logic
+    }
+    return render(request, 'file_management/trash.html', context)
+
+# Permanently delete item
+def permanently_delete_item(request):
+    item_name = request.GET.get('name')
+    item_path = os.path.join(settings.TRASH_DIR, item_name)
+
+    if os.path.isdir(item_path):
+        shutil.rmtree(item_path)
+    else:
+        os.remove(item_path)
+
+    metadata_path = item_path + '.meta'
+    if os.path.exists(metadata_path):
+        os.remove(metadata_path)
+
+    return redirect('trash_list')
+
+# Restore item
+def restore_item(request):
+    item_name = request.GET.get('name')
+    item_path = os.path.join(settings.TRASH_DIR, item_name)
+    target_path = os.path.join(settings.MEDIA_ROOT, item_name)
+
+    if os.path.exists(target_path):
+        # Handle case where item with the same name already exists
+        # You may want to implement a different logic here, e.g., renaming the item
+        pass
+    else:
+        os.rename(item_path, target_path)
+        metadata_path = item_path + '.meta'
+        if os.path.exists(metadata_path):
+            os.remove(metadata_path)
+
+    return redirect('trash_list')
+
+
+# Download trashed folder
+def download_trashed_folder(request):
+    if request.method == 'GET':
+        # Extract folder name from the request GET parameters
+        folder_name = request.GET.get('name')
+        # Construct the full folder path using the trash directory
+        full_folder_path = os.path.join(settings.TRASH_DIR, folder_name)
+
+        # Create a temporary directory to store the zip file
+        temp_dir = tempfile.mkdtemp()
+        # Create a temporary zip file
+        zip_file_path = os.path.join(temp_dir, f"{folder_name}.zip")
+
+        # Create a zip file and add the contents of the trashed folder and its subfolders to it
+        with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for root, dirs, files in os.walk(full_folder_path):
+                # Add all files in the current directory
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    rel_path = os.path.relpath(file_path, full_folder_path)
+                    zipf.write(file_path, rel_path)
+                # Add all subdirectories
+                for dir in dirs:
+                    dir_path = os.path.join(root, dir)
+                    rel_path = os.path.relpath(dir_path, full_folder_path)
+                    zipf.write(dir_path, rel_path)
+
+        # Read the zip file as binary data
+        with open(zip_file_path, 'rb') as f:
+            zip_data = f.read()
+
+        # Delete the temporary directory and zip file
+        shutil.rmtree(temp_dir)
+
+        # Prepare the response with the zip file as an attachment
+        response = HttpResponse(zip_data, content_type='application/zip')
+        response['Content-Disposition'] = f'attachment; filename="{folder_name}.zip"'
+        return response
+    
+def download_trashed_file(request):
+    if request.method == 'GET':
+        # Extract file name from the request GET parameters
+        file_name = request.GET.get('name')
+        # Construct the full file path using the trash directory
+        full_file_path = os.path.join(settings.TRASH_DIR, file_name)
+
+        # Check if the file exists
+        if os.path.exists(full_file_path):
+            # Open the file as binary data
+            with open(full_file_path, 'rb') as file:
+                # Prepare the response with the file content as an attachment
+                response = HttpResponse(file.read(), content_type='application/force-download')
+                response['Content-Disposition'] = f'attachment; filename="{file_name}"'
+                return response
+        else:
+            # File not found, return a 404 response or handle accordingly
+            return HttpResponse(status=404)

@@ -1,7 +1,7 @@
 {% extends 'file_management/app.html' %}
 
 {% block title %}
-Coop Repo
+Users - Coop Repo
 {% endblock %}
 
 {% block additional_css %}
@@ -25,10 +25,12 @@ Coop Repo
             </div>
 
             <div class="row">
+               
+
                 <div class="col">
                     <div class="table-responsive" style="height: 50vh; overflow-y: auto;">
                         {% if users %}
-                        <table class="table table-hover">
+                        <table class="table table-bordered  table-hover">
                             <thead class="thead-dark">
                                 <tr>
                                     {% comment %} <th>First Name</th>
