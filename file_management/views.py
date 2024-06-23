@@ -213,7 +213,7 @@ def delete_file(request):
         file_name = request.GET.get('name')
         folder_path = request.GET.get('path')
         full_file_path = os.path.join(settings.MEDIA_ROOT, folder_path.lstrip('/'), file_name)
-        trash_file_path = os.path.join(settings.TRASH_DIR, folder_path.lstrip('/'), file_name)
+        trash_file_path = os.path.join(settings.TRASH_DIR,file_name)
 
         if os.path.exists(full_file_path):
             os.makedirs(os.path.dirname(trash_file_path), exist_ok=True)
@@ -327,8 +327,11 @@ def load_users(request):
 def load_user_activities(request):
     logs_dir = os.path.join(settings.BASE_DIR, 'logs/')
     logs = [f for f in os.listdir(logs_dir) if f.startswith('user_activity_') and f.endswith('.log')]
-    context = {'logs': logs}
     
+    # Sort logs based on modification time (most recent first)
+    logs.sort(key=lambda x: os.path.getmtime(os.path.join(logs_dir, x)), reverse=True)
+    
+    context = {'logs': logs}
     return render(request, 'file_management/logs.html', context)
 
 def get_log_content(request, log_name):

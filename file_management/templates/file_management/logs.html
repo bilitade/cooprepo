@@ -6,49 +6,64 @@ User Activity - Coop Repo
 
 {% block additional_css %}
 <style>
-    /* Add additional CSS specific to the dashboard page */
+    /* Custom CSS for log.html */
+    #log-list {
+        max-height: calc(100vh - 250px);  /* Adjust based on your navbar and footer height */
+        overflow-y: auto;  /* Enable vertical scrolling */
+       
+    }
     #log-content {
         white-space: pre;  /* Preserve whitespace and formatting */
-        overflow-x: auto;  /* Enable horizontal scrolling */
-        height: 500px;     /* Set a fixed height */
+        overflow-y: auto;  /* Enable vertical scrolling */
+        max-height: calc(100vh - 250px);  /* Adjust based on your navbar and footer height */
         padding: 10px;     /* Add some padding */
-        background-color: #f8f9fa;  /* Light background for better readability */
+      
+        color: #000000;     /* Text color */
+        border: 1px solid #00AEEF; /* Add a subtle border */
+        border-radius: 5px; /* Rounded corners */
+    }
+    .log-link {
+        cursor: pointer; /* Change cursor to pointer on log links */
+        color:#000000
+    }
+    .card-header {
+        background-color: #00AEEF !important;  /* Updated card header background color */
+         color:#000000  /* Text color for card header */
     }
 </style>
 {% endblock %}
 
 {% block content %}
-
 {% include 'file_management/navbar.html' %}
-{% load static %}
-<div class="container-fluid">
-    <div class="d-sm-flex justify-content-between align-items-center mb-4"></div>
+<div class="container-fluid mt-4">
     <div class="row">
         <!-- User Activity Logs Section -->
-        <div class="col-xs-12 col-xl-3" style="box-shadow: 0px 0px;">
-            <h6>User Activity Logs</h6>
-            <ul class="list-group">
-                {% for log in logs %}
+        <div class="col-xl-3 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    User Activity Logs
+                </div>
+                <ul id="log-list" class="list-group list-group-flush">
+                    {% for log in logs %}
                     <li class="list-group-item">
                         <a href="#" class="log-link" data-log-name="{{ log }}">{{ log }}</a>
                     </li>
-                {% empty %}
+                    {% empty %}
                     <li class="list-group-item">No logs found.</li>
-                {% endfor %}
-            </ul>
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
         
         <!-- Log Preview Section -->
-        <div class="col-xs-12 col-xl-9" style="box-shadow: 0px 0px;">
-            <h6 class="text-center">Log Preview</h6>
-            <div class="row">
-                <div class="col">
-                    <div class="card">
-                        <div class="card-body">
-                            <div id="log-content">
-                                Select a log file to preview its content.
-                            </div>
-                        </div>
+        <div class="col-xl-9">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    Log Preview
+                </div>
+                <div class="card-body">
+                    <div id="log-content">
+                        Select a log file to preview its content.
                     </div>
                 </div>
             </div>

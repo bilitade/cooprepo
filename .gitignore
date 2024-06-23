@@ -43,3 +43,5 @@ Thumbs.db
 
 # Ignore file management specific caches and other files
 file_management/__pycache__/
+media
+trash

@@ -1,4 +1,3 @@
-
 {% load static %}
 <!DOCTYPE html>
 <html>
@@ -12,38 +11,57 @@
     <link rel="stylesheet" href="{% static 'fonts/fontawesome-all.min.css' %}">
     <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico'%} ">
     
-   
     {% block additional_css %}{% endblock %}
     <style>
         /* Global styling for all <a> tags */
         a {
             text-decoration: none;
-      
-            color:#08B0F0
+            color: #08B0F0;
         }
+
+        /* Styling for the active nav link */
+        .nav-link.active {
+            background-color: #F8F9FC; /* Background color */
+            color: #F8F9FC; /* Text color */
+            border-radius: 30px 0 0 30px; /* Pill-shaped with rounded left edges */
+            padding-right: 20px; /* Add padding to align text and icon */
+            margin-right: 20px; /* Compensate for padding to maintain full width */
+            position: relative; /* Ensure z-index works properly */
+            z-index: 1; /* Ensure active link stays on top of other elements */
+        }
+        
+
+        .nav-link.active span,
+        .nav-link.active i {
+            color: #08B0F0 !important; /* Text and icon color */
+        }
+
+
+
+        
     </style>
-  
 </head>
-
-
 
 <body id="page-top">
     <div id="wrapper">
-        <nav class="navbar navbar-dark align-items-start sidebar toggled sidebar-dark accordion bg-gradient-primary p-0" style="border-color: var(--bs-navbar-color);background: #00aeef;">
-            <div class="container-fluid d-flex flex-column p-0"><a class="navbar-brand d-flex justify-content-center align-items-center sidebar-brand m-0" href="#">
+        <nav class="navbar fixed-left navbar-dark align-items-start sidebar toggled sidebar-dark accordion bg-gradient-primary p-0" style="border-color: var(--bs-navbar-color);background: #00aeef;">
+            <div class="container-fluid d-flex flex-column p-0">
+                <a class="navbar-brand d-flex justify-content-center align-items-center sidebar-brand m-0" href="#">
                     <div class="pt-2 pl-2 mt-4 ml-4"><img class="" src="{% static 'img/Group%202%20(2).svg' %}" width="64" height="64"></div>
                     <div class="sidebar-brand-text mx-3"></div>
                 </a>
                 <hr class="sidebar-divider my-0">
-                <ul class="navbar-nav text-light mt-4  " id="accordionSidebar">
-                    <li class="nav-item mt-4"><a class="nav-link active text-center" href="{% url 'dashboard'%}"><i style="font-size: 20px" class="far fa-file-alt"></i><span> Files</span></a></li>
-                   {% if can_approve_user %}
-                    <li class="nav-item mt-2"><a class="nav-link active text-center" href="{% url 'users'%}"><i style="font-size: 20px"  class="fas fa-users"></i><span> Users</span></a></li>
-                    <li class="nav-item mt-2"><a class="nav-link active text-center" href="{% url 'load_user_activities'%}"><i style="font-size: 20px"  class="fas fa-history"></i><span> User Activity</span></a></li>
-                    <li class="nav-item mt-2"><a class="nav-link active text-center" href="{% url 'trash_list'%}"><i style="font-size: 20px"  class="fas fa-trash"></i><span>Trash</span></a></li>
+                <ul class="navbar-nav text-light mt-4 " id="accordionSidebar">
+                    <li class="nav-item mt-4"><a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %} text-center" href="{% url 'dashboard' %}"><i style="font-size: 20px" class="far fa-file-alt"></i><span> Files</span></a></li>
+                    {% if can_approve_user %}
+                    <li class="nav-item mt-2"><a class="nav-link {% if request.resolver_match.url_name == 'users' %}active{% endif %} text-center" href="{% url 'users' %}"><i style="font-size: 20px" class="fas fa-users"></i><span> Users</span></a></li>
+                    <li class="nav-item mt-2"><a class="nav-link {% if request.resolver_match.url_name == 'load_user_activities' %}active{% endif %} text-center" href="{% url 'load_user_activities' %}"><i style="font-size: 20px" class="fas fa-history"></i><span> User Activity</span></a></li>
+                    <li class="nav-item mt-2"><a class="nav-link {% if request.resolver_match.url_name == 'trash_list' %}active{% endif %} text-center" href="{% url 'trash_list' %}"><i style="font-size: 20px" class="fas fa-trash"></i><span>Trash</span></a></li>
                     {% endif %}
-                   
-                <div class="text-center d-none d-md-inline"><button class="btn rounded-circle border-0" id="sidebarToggle" type="button"></button></div>
+                </ul>
+                {% comment %} <div class="text-center d-none d-md-inline">
+                    <button class="btn rounded-circle border-0" id="sidebarToggle" type="button"></button>
+                </div> {% endcomment %}
             </div>
         </nav>
         <div class="d-flex flex-column" id="content-wrapper">
@@ -55,11 +73,11 @@
                     <div class="text-center my-auto copyright"><span>2024 © Cooperative Bank of Oromia&nbsp;</span></div>
                 </div>
             </footer>
-        </div><a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
+        </div>
+        <a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
     </div>
     <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
     <script src="{% static 'js/theme.js' %}"></script>
-
     {% block additional_js %}{% endblock %}
 </body>
 

@@ -1,7 +1,7 @@
 {% load static %}
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="utf-8">
@@ -9,41 +9,66 @@
     <title>CoopRepo</title>
     <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i&amp;display=swap">
-    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico'%} ">
+    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}"> <!-- Your custom CSS file -->
+    <style>
+        body {
+            background: url("{% static 'img/background.svg' %}") no-repeat center center fixed;
+            background-size: cover;
+        }
+        .login-container {
+            max-width: 400px; /* Adjust as needed for smaller screens */
+            margin-top: 100px;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+            margin: 0 auto; /* Center the card horizontally */
+        }
+        @media (max-width: 576px) {
+            .login-container {
+                padding: 15px;
+            }
+        }
+    </style>
 </head>
 
-<body class="bg-gradient-primary" style="background: #f2f4f5;">
+<body>
     <div class="container">
         <section class="position-relative py-4 py-xl-5">
-            <div class="container">
-                <div class="row d-flex justify-content-center">
-                    <div class=" col-xl-4">
-                        <div class="card mb-5">
-                            <div class="card-body d-flex flex-column align-items-center">
-                                <form class="text-center my-5" method="post">
-                                    {% csrf_token %}
-                                    <div><img src="{% static 'img/Logo%20%20long.svg' %}">
-                                        <div class="pt-4">
-                                            {% if error_message %}
-                                                <h1 class="h6" style="color: rgb(255,4,4);">{{ error_message }}</h1>
-                                            {% endif %}
-                                        </div>
+            <div class="row justify-content-center">
+                <div class="col-xl-4">
+                    <div class="login-container card mb-5">
+                        <div class="card-body d-flex flex-column align-items-center">
+                            <form class="text-center my-5" method="post">
+                                {% csrf_token %}
+                                <div>
+                                    <img src="{% static 'img/Logo%20%20long.svg' %}" alt="Logo">
+                                    <div class="pt-4">
+                                        {% if error_message %}
+                                        <h1 class="h6 text-danger">{{ error_message }}</h1>
+                                        {% endif %}
                                     </div>
-                                    <div class="mb-3"><input class="form-control" type="email" name="email" placeholder="Email"></div>
-                                    <div class="mb-3"><input class="form-control" type="password" name="password" placeholder="Password"></div>
-                                    <div class="mb-3"><button class="btn btn-primary d-block w-100" type="submit" style="background: #00aeef;border-color: #00aeef;">Login</button></div>
-                                    <a href="{% url 'password_reset' %}"  class="text-muted">Forgot your password?</a>
-                                </form>
-                            </div>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <input class="form-control" type="email" name="email" placeholder="Email" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <input class="form-control" type="password" name="password" placeholder="Password" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <button  style="background-color:#00AEEF; color:white"class="btn  btn-block" type="submit">Login</button>
+                                </div>
+                                <a href="{% url 'password_reset' %}" class="text-muted">Forgot your password?</a>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
     </div>
+
     <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
-   
 </body>
 
 </html>
-

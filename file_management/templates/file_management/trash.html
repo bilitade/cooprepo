@@ -7,6 +7,10 @@ Trash - Coop Repo
 {% block additional_css %}
 <style>
     /* Add additional CSS specific to the trash page */
+    a {
+        text-decoration: none;
+        font-weight: bold;
+    }
 </style>
 {% endblock %}
 
@@ -24,8 +28,11 @@ Trash - Coop Repo
                     <div class="row">
                         <div class="col">
                             <ol class="breadcrumb">
-                                <li  class="breadcrumb-item"><i style="color:#08B0F0" class="fas fa-compact-disc"></i>  </li>
+                                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="fas fa-compact-disc" style="color:#08B0F0"></i></a></li>
                                 <li class="breadcrumb-item active"> Trash</li>
+                                {% for name, breadcrumb_path in breadcrumbs %}
+                                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}?path={{ breadcrumb_path }}">{{ name }}</a></li>
+                            {% endfor %}
                             </ol>
                         </div>
                     </div>
@@ -33,14 +40,13 @@ Trash - Coop Repo
             </div>
             <div class="row">
                 <div class="col">
-                    <div class="table-responsive " style="height:60vh; overflow-y: auto;">
+                    <div class="table-responsive" style="height:60vh; overflow-y: auto;">
                         <table class="table table-hover">
                             <thead class="thead-dark">
                                 <tr>
                                     <th>Name</th>
-                                    <th>Type&nbsp;</th>
-                                
-                                    <th>Size&nbsp;</th>
+                                    <th>Type</th>
+                                    <th>Size</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -49,7 +55,7 @@ Trash - Coop Repo
                                 <tr>
                                     <td>
                                         {% if item.type == 'Folder' %}
-                                            <i class="far fa-folder" style="color: #00aeef;font-size: 19px;"></i>
+                                            <i class="far fa-folder" style="color: #00aeef; font-size: 19px;"></i>
                                             {{ item.name }}
                                         {% else %}
                                             <i class="far fa-file-alt" style="color: #00aeef;"></i>
@@ -57,7 +63,6 @@ Trash - Coop Repo
                                         {% endif %}
                                     </td>
                                     <td>{{ item.type }}</td>
-                              
                                     <td>{{ item.size }}</td>
                                     <td>
                                         <div class="dropdown">
@@ -66,20 +71,37 @@ Trash - Coop Repo
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton{{ forloop.counter }}">
                                                 {% if item.type == 'Folder' %}
-                                                    <li><a style="color:#f16a6f" class="dropdown-item {% if not can_delete %}disabled{% endif %}" href="{% url 'permanently_delete_item' %}?path={{ item.relative_path }}&name={{ item.name }}" {% if not can_delete %}tabindex="-1" aria-disabled="true"{% endif %}><i class="fas fa-minus-circle"></i> Delete</a></li>
-                                                    <li><a style="color:#1e85f7"   class="dropdown-item" href="{% url 'restore_item' %}?path={{ item.relative_path }}&name={{ item.name }}"><i class="fas fa-trash-restore"></i> Restore</a></li>
-                                                    <li><a  style="color:#55a194" class="dropdown-item" href="{% url 'download_trashed_folder' %}?name={{ item.name }}"><i class="fas fa-download"></i> Download</a></li>
-
+                                                    <li><a style="color:#f16a6f" class="dropdown-item {% if not can_delete %}disabled{% endif %}" href="#" data-bs-toggle="modal" data-bs-target="#deleteModal{{ forloop.counter }}"><i class="fas fa-minus-circle"></i> Delete</a></li>
+                                                    <li><a style="color:#1e85f7" class="dropdown-item" href="{% url 'restore_item' %}?path={{ item.relative_path }}&name={{ item.name }}"><i class="fas fa-trash-restore"></i> Restore</a></li>
+                                                    <li><a style="color:#55a194" class="dropdown-item" href="{% url 'download_trashed_folder' %}?name={{ item.name }}"><i class="fas fa-download"></i> Download</a></li>
                                                 {% else %}
-                                                    <li><a style="color:#f16a6f" class="dropdown-item {% if not can_delete %}disabled{% endif %}" href="{% url 'permanently_delete_item' %}?path={{ item.relative_path }}&name={{ item.name }}" {% if not can_delete %}tabindex="-1" aria-disabled="true"{% endif %}><i class="fas fa-minus-circle"></i> Delete</a></li>
+                                                    <li><a style="color:#f16a6f" class="dropdown-item {% if not can_delete %}disabled{% endif %}" href="#" data-bs-toggle="modal" data-bs-target="#deleteModal{{ forloop.counter }}"><i class="fas fa-minus-circle"></i> Delete</a></li>
                                                     <li><a style="color:#1e85f7" class="dropdown-item" href="{% url 'restore_item' %}?path={{ item.relative_path }}&name={{ item.name }}"><i class="fas fa-trash-restore"></i> Restore</a></li>
                                                     <li><a style="color:#55a194" class="dropdown-item" href="{% url 'download_trashed_file' %}?name={{ item.name }}"><i class="fas fa-download"></i> Download</a></li>
-
                                                 {% endif %}
                                             </ul>
                                         </div>
                                     </td>
                                 </tr>
+
+                                <!-- Delete Modal for Item -->
+                                <div class="modal fade" id="deleteModal{{ forloop.counter }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ forloop.counter }}" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="deleteModalLabel{{ forloop.counter }}">Confirm Deletion</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Are you sure you want to permanently delete "{{ item.name }}"?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <a href="{% url 'permanently_delete_item' %}?path={{ item.relative_path }}&name={{ item.name }}" class="btn btn-danger">Delete</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 {% endfor %}
                             </tbody>
                         </table>

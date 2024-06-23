@@ -13,7 +13,7 @@ Files - Coop Repo
 
 {% block content %}
 
-{% include 'file_management/navbar.html' %}
+
 {% load static %}
 <div class="container-fluid">
     <div class="d-sm-flex justify-content-between align-items-center mb-4"></div>
@@ -36,8 +36,6 @@ Files - Coop Repo
                         <div class="col" style="border-radius: 2px; border-top-left-radius: 10px;border-top-right-radius: 1px;border-bottom-right-radius: 1px;border-bottom-left-radius: 1px;border-style: solid;border-color:#E3E4E7;">
                              
                             
-                            
-                        
                             <button class="btn btn-light btn-sm px-3 mx-2 {% if not can_upload_file %}disabled{% endif %} " data-bs-toggle="modal" data-bs-target="#createFolderModal">
                                 <i class="fas fa-folder-plus" style="color: #00aeef;font-size: 20px;"></i>
                             </button>
@@ -66,7 +64,7 @@ Files - Coop Repo
                                 </tr>
                             </thead>
                           
-                            <tbody>
+                            {% comment %} <tbody>
                                 {% for item in items %}
                                 <tr>
                                     <td>
@@ -105,14 +103,124 @@ Files - Coop Repo
                                                 {% endif %}
                                             </ul>
                                         </div>
+
+
+
+                                                    <!-- Delete Modal for Item -->
+                                            <div class="modal fade" id="deleteModal{{ forloop.counter }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ forloop.counter }}" aria-hidden="true">
+                                                <div class="modal-dialog" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="deleteModalLabel{{ forloop.counter }}">Confirm Trash</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            Are you sure you want to Trash  "{{ item.name }}"?
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                            <a href="{% url 'permanently_delete_item' %}?path={{ item.relative_path }}&name={{ item.name }}" class="btn btn-danger">Delete</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody> {% endcomment %}
+
+                            <tbody>
+                                {% for item in items %}
+                                <tr>
+                                    <td>
+                                        {% if item.type == 'Folder' %}
+                                            <i class="far fa-folder" style="color: #00aeef;font-size: 19px;"></i>
+                                            <a href="{% url 'dashboard' %}?path={{ media_path }}/{{ item.name }}">{{ item.name }}</a>
+                                        {% else %}
+                                            <i class="far fa-file-alt" style="color: #00aeef;"></i>
+                                            {{ item.name }}
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ item.type }}</td>
+                                    <td>{{ item.modified }}</td>
+                                    <td>{{ item.size }}</td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button class="btn btn-light" type="button" id="dropdownMenuButton{{ forloop.counter }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="fas fa-ellipsis-v" style="color: #00aeef;"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton{{ forloop.counter }}">
+                                                {% if item.type == 'Folder' %}
+                                                <li>
+                                                    <a style="color:#f16a6f" class="dropdown-item {% if not can_delete %}disabled{% endif %}" data-bs-toggle="modal" data-bs-target="#deleteModal{{ forloop.counter }}">
+                                                        <i class="fas fa-trash-alt"></i> Trash
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a style="color:#55a194" class="dropdown-item" href="{% url 'download_folder' %}?path={{ media_path }}&name={{ item.name }}">
+                                                        <i class="fas fa-download"></i> Download
+                                                    </a>
+                                                </li>
+                                                {% else %}
+                                                <li>
+                                                    <a style="color:#f16a6f" class="dropdown-item {% if not can_delete %}disabled{% endif %}" data-bs-toggle="modal" data-bs-target="#deleteModal{{ forloop.counter }}">
+                                                        <i class="fas fa-trash-alt"></i> Trash
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a style="color:#1e85f7" class="dropdown-item" href="{% url 'view_file' %}?path={{ media_path }}&name={{ item.name }}">
+                                                        <i class="fas fa-eye"></i> View
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a style="color:#55a194" class="dropdown-item" href="{% url 'download_file' %}?path={{ media_path }}&name={{ item.name }}">
+                                                        <i class="fas fa-download"></i> Download
+                                                    </a>
+                                                </li>
+                                                {% endif %}
+                                            </ul>
+                                        </div>
+                            
+                                        <!-- Delete Modal for Item -->
+                                        <div class="modal fade" id="deleteModal{{ forloop.counter }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ forloop.counter }}" aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="deleteModalLabel{{ forloop.counter }}">Confirm Trash</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        Are you sure you want to Trash "{{ item.name }}"?
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                        {% if item.type == 'Folder' %}
+                                                        <a href="{% url 'delete_folder' %}?path={{ media_path }}&name={{ item.name }}" class="btn btn-danger">Delete</a>
+                                                        {% else %}
+                                                        <a href="{% url 'delete_file' %}?path={{ media_path }}&name={{ item.name }}" class="btn btn-danger">Delete</a>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
+                            
                         </table>
                     </div>
                 </div>
             </div>
+        
+          
+        
+        
+        
+        
+        
+        
+        
         </div>
     </div>
 </div>
