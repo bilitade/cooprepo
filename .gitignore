@@ -1,15 +1,24 @@
 # Ignore the virtual environment directory
 venv/
 
+file_management/__pycache__/
+file_management/migrations/__pycache__/
+
 # Ignore compiled bytecode
 __pycache__/
 *.py[cod]
 
-# Ignore media files
-media/
+# Keep media, trash, and logs folders but ignore files inside them
+media/*
+!media/.gitkeep
+
+trash/*
+!trash/.gitkeep
+
+logs/*
+!logs/.gitkeep
 
 # Ignore log files
-logs/
 *.log
 
 # Ignore database files (if using SQLite, for example)
@@ -43,6 +52,3 @@ Thumbs.db
 
 # Ignore file management specific caches and other files
 file_management/__pycache__/
-
-media/
-trash/
