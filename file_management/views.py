@@ -36,9 +36,9 @@ def login_view(request):
     return render(request, 'file_management/login.html')
 
 
+@login_required
 def logout_view(request):
     # Capture the username and email before logging out
-    
     username = request.user.username
     track_user_activity(username=username, action=f' logged out of the system')
 
@@ -113,7 +113,7 @@ def dashboard(request):
         file_form = FileUploadForm()
 
     breadcrumbs = generate_breadcrumbs(path)
-    user_groups = request.user.groups.values_list('name', flat=True) if request.user.is_authenticated else []
+  
     
     context = {
     'items': items,
@@ -121,17 +121,9 @@ def dashboard(request):
     'breadcrumbs': breadcrumbs,
     'folder_form': folder_form,
     'file_form': file_form,
-    'user': request.user,
-    'can_upload_file': request.user.has_perm('auth.can_upload_file'),
-    'can_create_folder': request.user.has_perm('auth.can_create_folder'),
-    'can_delete': request.user.has_perm('auth.can_delete'),
-    'can_ban_user': request.user.has_perm('auth.can_ban_user'),
-    'can_approve_user': request.user.has_perm('auth.can_approve_user'),
-    'can_delete_user': request.user.has_perm('auth.can_delete_user'),
-    'can_view': request.user.has_perm('auth.can_view'),
-    'can_download': request.user.has_perm('auth.can_download'),
-    'can_create_user': request.user.has_perm('auth.can_create_user'),
-    'user_group':user_groups
+    'user': request.user
+    
+   
 }
 
 
@@ -139,23 +131,7 @@ def dashboard(request):
 
     return render(request, 'file_management/dashboard.html', context)
 
-#delete folder
-@login_required
-@permission_required("auth.can_delete")
-def delete_folder(request):
-    if request.method == 'GET':
-        folder_name = request.GET.get('name')
-        folder_path = request.GET.get('path')
-        full_folder_path = os.path.join(settings.MEDIA_ROOT, folder_path.strip('/'), folder_name)
-        trash_folder_path = os.path.join(settings.TRASH_DIR, folder_path.strip('/'), folder_name)
 
-        if os.path.exists(full_folder_path):
-            os.makedirs(os.path.dirname(trash_folder_path), exist_ok=True)
-            shutil.move(full_folder_path, trash_folder_path)
-            track_user_activity(username=request.user.username, action=f'Moved Folder: "{folder_name}" to trash from path: {full_folder_path}')
-        
-        return redirect('dashboard')
-    
 # Download Folder
 @login_required
 @permission_required("auth.can_download")
@@ -204,10 +180,27 @@ def download_folder(request):
         response['Content-Disposition'] = f'attachment; filename="{folder_name}.zip"'
         track_user_activity(username=request.user.username, action=f'logged out of the system')
         return response
-    
+
+#delete folder
+@login_required
+@permission_required("auth.can_trash")
+def delete_folder(request):
+    if request.method == 'GET':
+        folder_name = request.GET.get('name')
+        folder_path = request.GET.get('path')
+        full_folder_path = os.path.join(settings.MEDIA_ROOT, folder_path.strip('/'), folder_name)
+        trash_folder_path = os.path.join(settings.TRASH_DIR, folder_path.strip('/'), folder_name)
+
+        if os.path.exists(full_folder_path):
+            os.makedirs(os.path.dirname(trash_folder_path), exist_ok=True)
+            shutil.move(full_folder_path, trash_folder_path)
+            track_user_activity(username=request.user.username, action=f'Trashed Folder: "{folder_name}" to trash from path: {full_folder_path}')
+        
+        return redirect('dashboard')
+       
 #delete file
 @login_required
-@permission_required('auth.can_delete')
+@permission_required('auth.can_trash')
 def delete_file(request):
     if request.method == 'GET':
         file_name = request.GET.get('name')
@@ -218,7 +211,7 @@ def delete_file(request):
         if os.path.exists(full_file_path):
             os.makedirs(os.path.dirname(trash_file_path), exist_ok=True)
             shutil.move(full_file_path, trash_file_path)
-            track_user_activity(username=request.user.username, action=f'Moved File: "{file_name}" to trash from path: {full_file_path}')
+            track_user_activity(username=request.user.username, action=f'Trashed File: "{file_name}" from path: {folder_path}')
         
         return redirect('dashboard')
     
@@ -250,7 +243,9 @@ def view_file(request):
 
     # Placeholder response if the request method is not GET
     return HttpResponse('File View Initiated')
+
 @login_required
+@permission_required("auth.can_download")
 def download_file(request):
     if request.method == 'GET':
         # Extract file name from the request GET parameters
@@ -304,6 +299,7 @@ def search_files(request):
 
 #download file  in search view
 @login_required
+@permission_required("auth.can_download")
 def download(request):
     path = request.GET.get('path', '')
     file_path = os.path.join(settings.MEDIA_ROOT, path)
@@ -316,7 +312,8 @@ def download(request):
     else:
         raise Http404("File does not exist")
     
-#load user to the interface 
+@login_required
+@permission_required("auth.can_view_user")
 @login_required
 def load_users(request):
     users = User.objects.all().order_by('-date_joined')
@@ -325,7 +322,9 @@ def load_users(request):
          
     }
     return render(request, 'file_management/users.html', context)
+
 @login_required
+@permission_required("auth.can_view_logs")
 def load_user_activities(request):
     logs_dir = os.path.join(settings.BASE_DIR, 'logs/')
     logs = [f for f in os.listdir(logs_dir) if f.startswith('user_activity_') and f.endswith('.log')]
@@ -335,7 +334,8 @@ def load_user_activities(request):
     
     context = {'logs': logs}
     return render(request, 'file_management/logs.html', context)
-@login_required
+
+
 def get_log_content(request, log_name):
     logs_dir = os.path.join(settings.BASE_DIR, 'logs/')
     log_path = os.path.join(logs_dir, log_name)
@@ -348,6 +348,7 @@ def get_log_content(request, log_name):
     
 
 @login_required
+@permission_required("auth.can_view_trash")
 # Trash list view
 def trash_list(request):
     def get_file_size(path):
@@ -389,24 +390,29 @@ def trash_list(request):
         'can_delete': True,  # Update this based on your permission logic
     }
     return render(request, 'file_management/trash.html', context)
+
 @login_required
-# Permanently delete item
+@permission_required("auth.can_delete")
 def permanently_delete_item(request):
     item_name = request.GET.get('name')
     item_path = os.path.join(settings.TRASH_DIR, item_name)
 
     if os.path.isdir(item_path):
         shutil.rmtree(item_path)
+        track_user_activity(username=request.user.username, action=f'Permanently Deleted Folder :- "{item_name}" from path: {item_path}')
     else:
         os.remove(item_path)
+        track_user_activity(username=request.user.username, action=f'Permanently Deleted File :- "{item_name}" from path: {item_path}')
 
     metadata_path = item_path + '.meta'
     if os.path.exists(metadata_path):
         os.remove(metadata_path)
 
+        
+
     return redirect('trash_list')
 @login_required
-# Restore item
+@permission_required("auth.can_restore")
 def restore_item(request):
     item_name = request.GET.get('name')
     item_path = os.path.join(settings.TRASH_DIR, item_name)
@@ -419,13 +425,14 @@ def restore_item(request):
     else:
         os.rename(item_path, target_path)
         metadata_path = item_path + '.meta'
+        
         if os.path.exists(metadata_path):
             os.remove(metadata_path)
-
+        track_user_activity(username=request.user.username, action=f'Restored Folde/File :- "{item_name}" to path: {target_path}')
     return redirect('trash_list')
 
 @login_required
-# Download trashed folder
+@permission_required("auth.can_download")
 def download_trashed_folder(request):
     if request.method == 'GET':
         # Extract folder name from the request GET parameters
@@ -463,7 +470,9 @@ def download_trashed_folder(request):
         response = HttpResponse(zip_data, content_type='application/zip')
         response['Content-Disposition'] = f'attachment; filename="{folder_name}.zip"'
         return response
-@login_required   
+    
+@login_required
+@permission_required("auth.can_download")
 def download_trashed_file(request):
     if request.method == 'GET':
         # Extract file name from the request GET parameters

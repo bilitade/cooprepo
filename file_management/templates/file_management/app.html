@@ -52,16 +52,22 @@
                 </a>
                 <hr class="sidebar-divider my-0">
                 <ul class="navbar-nav text-light mt-4 " id="accordionSidebar">
+
                     <li class="nav-item mt-4"><a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %} text-center" href="{% url 'dashboard' %}"><i style="font-size: 20px" class="far fa-file-alt"></i><span> Files</span></a></li>
-                    {% if can_approve_user %}
+                    
+                    {% if perms.auth.can_view_user %}
                     <li class="nav-item mt-2"><a class="nav-link {% if request.resolver_match.url_name == 'users' %}active{% endif %} text-center" href="{% url 'users' %}"><i style="font-size: 20px" class="fas fa-users"></i><span> Users</span></a></li>
+                    {% endif %}
+                    {% if perms.auth.can_view_logs %}
                     <li class="nav-item mt-2"><a class="nav-link {% if request.resolver_match.url_name == 'load_user_activities' %}active{% endif %} text-center" href="{% url 'load_user_activities' %}"><i style="font-size: 20px" class="fas fa-history"></i><span> User Activity</span></a></li>
+                      {% endif %}
+                    {% if perms.auth.can_view_trash %}
                     <li class="nav-item mt-2"><a class="nav-link {% if request.resolver_match.url_name == 'trash_list' %}active{% endif %} text-center" href="{% url 'trash_list' %}"><i style="font-size: 20px" class="fas fa-trash"></i><span>Trash</span></a></li>
                     {% endif %}
+
+               
                 </ul>
-                {% comment %} <div class="text-center d-none d-md-inline">
-                    <button class="btn rounded-circle border-0" id="sidebarToggle" type="button"></button>
-                </div> {% endcomment %}
+              
             </div>
         </nav>
         <div class="d-flex flex-column" id="content-wrapper">

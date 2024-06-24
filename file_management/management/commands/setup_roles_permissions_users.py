@@ -10,12 +10,12 @@ class Command(BaseCommand):
             'can_upload_file',
             'can_create_folder',
             'can_delete',
-            'can_ban_user',
-            'can_approve_user',
-            'can_delete_user',
-            'can_view',
+            'can_trash',
+            'can_restore',
+            'can_view_user',
+            'can_view_trash',
+            'can_view_logs',
             'can_download',
-            'can_create_user',
         ]
 
         content_type = ContentType.objects.get_for_model(User)
@@ -29,23 +29,25 @@ class Command(BaseCommand):
                 'can_upload_file',
                 'can_create_folder',
                 'can_delete',
-                'can_ban_user',
-                'can_approve_user',
-                'can_delete_user',
-                'can_view',
+                'can_trash',
+                'can_restore',
+                'can_view_user',
+                'can_view_trash',
+                'can_view_logs',
                 'can_download',
-                'can_create_user',
             ],
             'Editor': [
                 'can_upload_file',
                 'can_create_folder',
                 'can_delete',
-                'can_view',
+                'can_trash',
+                'can_restore',
+                'can_view_trash',
                 'can_download',
             ],
             'Staff': [
-                'can_view',
-                'can_download',
+
+                'can_download'
             ],
         }
 
@@ -74,5 +76,5 @@ class Command(BaseCommand):
                     for group_name in user_data['groups']:
                         group = Group.objects.get(name=group_name)
                         user.groups.add(group)
-        
+
         self.stdout.write(self.style.SUCCESS('Successfully set up roles, permissions, and demo users'))

@@ -16,12 +16,12 @@ class Command(BaseCommand):
             'can_upload_file',
             'can_create_folder',
             'can_delete',
-            'can_ban_user',
-            'can_approve_user',
-            'can_delete_user',
-            'can_view',
+            'can_trash',
+            'can_restore',
+            'can_view_user',
+            'can_view_trash',
+            'can_view_logs',
             'can_download',
-            'can_create_user',
         ]
 
         # Delete demo users

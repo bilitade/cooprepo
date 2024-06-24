@@ -71,13 +71,13 @@ Trash - Coop Repo
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton{{ forloop.counter }}">
                                                 {% if item.type == 'Folder' %}
-                                                    <li><a style="color:#f16a6f" class="dropdown-item {% if not can_delete %}disabled{% endif %}" href="#" data-bs-toggle="modal" data-bs-target="#deleteModal{{ forloop.counter }}"><i class="fas fa-minus-circle"></i> Delete</a></li>
-                                                    <li><a style="color:#1e85f7" class="dropdown-item" href="{% url 'restore_item' %}?path={{ item.relative_path }}&name={{ item.name }}"><i class="fas fa-trash-restore"></i> Restore</a></li>
-                                                    <li><a style="color:#55a194" class="dropdown-item" href="{% url 'download_trashed_folder' %}?name={{ item.name }}"><i class="fas fa-download"></i> Download</a></li>
+                                                    <li><a style="color:#f16a6f" class="dropdown-item {% if not perms.auth.can_delete %}disabled{% endif %}" href="#" data-bs-toggle="modal" data-bs-target="#deleteModal{{ forloop.counter }}"><i class="fas fa-minus-circle"></i> Delete</a></li>
+                                                    <li><a style="color:#1e85f7" class="dropdown-item {% if not perms.auth.can_restore %}disabled{% endif %}" href="{% url 'restore_item' %}?path={{ item.relative_path }}&name={{ item.name }}"><i class="fas fa-trash-restore"></i> Restore</a></li>
+                                                    <li><a style="color:#55a194" class="dropdown-item  {% if not perms.auth.can_download %}disabled{% endif %} " href="{% url 'download_trashed_folder' %}?name={{ item.name }}"><i class="fas fa-download"></i> Download</a></li>
                                                 {% else %}
-                                                    <li><a style="color:#f16a6f" class="dropdown-item {% if not can_delete %}disabled{% endif %}" href="#" data-bs-toggle="modal" data-bs-target="#deleteModal{{ forloop.counter }}"><i class="fas fa-minus-circle"></i> Delete</a></li>
-                                                    <li><a style="color:#1e85f7" class="dropdown-item" href="{% url 'restore_item' %}?path={{ item.relative_path }}&name={{ item.name }}"><i class="fas fa-trash-restore"></i> Restore</a></li>
-                                                    <li><a style="color:#55a194" class="dropdown-item" href="{% url 'download_trashed_file' %}?name={{ item.name }}"><i class="fas fa-download"></i> Download</a></li>
+                                                    <li><a style="color:#f16a6f" class="dropdown-item {% if not perms.auth.can_delete %}disabled{% endif %}" href="#" data-bs-toggle="modal" data-bs-target="#deleteModal{{ forloop.counter }}"><i class="fas fa-minus-circle"></i> Delete</a></li>
+                                                    <li><a style="color:#1e85f7" class="dropdown-item {% if not perms.auth.can_restore %}disabled{% endif %}" href="{% url 'restore_item' %}?path={{ item.relative_path }}&name={{ item.name }}"><i class="fas fa-trash-restore"></i> Restore</a></li>
+                                                    <li><a style="color:#55a194" class="dropdown-item {% if not perms.auth.can_download %}disabled{% endif %}" href="{% url 'download_trashed_file' %}?name={{ item.name }}"><i class="fas fa-download"></i> Download</a></li>
                                                 {% endif %}
                                             </ul>
                                         </div>
